@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>テスト対策 Ver.3.6</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root {
+      --bg: #f6f7f9; --card: #ffffff; --ink: #1e293b; --muted: #64748b;
+      --line: #e2e8f0; --navy: #162b49; --navy-hover: #0f1e34;
+      --amber-bg: #fbf3e4; --amber-line: #e7cfa0; --amber-btn: #b97724; --amber-btn-hover: #9a611b;
+      --danger: #b91c1c; --danger-bg: #fef2f2; --ok: #15803d; --ok-bg: #f0fdf4;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg); color: var(--ink); line-height: 1.55;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; touch-action: manipulation; }
+
+    .topbar {
+      background: #fff; border-bottom: 1px solid var(--line); padding: 12px 20px;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      position: sticky; top: 0; z-index: 30;
+    }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 38px; height: 38px; border-radius: 10px; background: var(--navy); color: #fff;
+      font-weight: 700; display: grid; place-items: center; font-size: 1rem;
+    }
+    .brand-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .brand-name { font-weight: 700; font-size: 1rem; }
+    .ver-pill { background: #fef3c7; color: #92400e; font-weight: 700; font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; }
+    .subject-pill { background: #f1f5f9; color: #334155; font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+    .brand-desc { font-size: 0.76rem; color: var(--muted); }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .hdr-btn {
+      border: 1px solid var(--line); background: #fff; color: var(--ink);
+      border-radius: 9px; padding: 7px 12px; font-size: 0.85rem; font-weight: 600;
+    }
+    .hdr-btn:hover { background: #f8fafc; }
+    .hdr-btn.lock-btn { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .hdr-btn.lock-btn.unlocked { background: #15803d; border-color: #15803d; }
+
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 20px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; }
+    .section-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; margin-bottom: 8px; }
+    .card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .card-title { margin: 0; font-size: 1.05rem; font-weight: 700; }
+    .ghost-btn { border: 1px solid var(--line); background: #fff; color: #334155; border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; font-weight: 600; }
+    .ghost-btn:hover { background: #f8fafc; }
+
+    .subject-bar { display: grid; grid-template-columns: 1fr 220px auto; gap: 10px; }
+    @media (max-width: 720px) { .subject-bar { grid-template-columns: 1fr; } }
+    .field-input, .field-select, .field-textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 9px; padding: 9px 12px; background: #fff; color: var(--ink); }
+    .navy-btn { background: var(--navy); color: #fff; border: 1px solid var(--navy); border-radius: 9px; padding: 9px 16px; font-weight: 700; font-size: 0.88rem; }
+    .navy-btn:hover { background: var(--navy-hover); }
+    .subject-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip-btn { border: 1px solid var(--line); background: #f8fafc; color: #334155; border-radius: 999px; padding: 5px 12px; font-size: 0.82rem; font-weight: 600; }
+    .chip-btn.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+    /* 画像から問題作成エリア */
+    .scan-box {
+      border: 1.5px dashed #94a3b8; background: #f8fafc; border-radius: 12px;
+      padding: 14px; margin-top: 10px;
+    }
+    .scan-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+    .preview-img {
+      max-width: 260px; max-height: 160px; border-radius: 8px; border: 1px solid var(--line);
+      display: none; margin-top: 10px; object-fit: contain; background: #fff;
+    }
+    .preview-img.show { display: block; }
+
+    .challenge-card { background: var(--amber-bg); border: 1px solid var(--amber-line); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; }
+    .challenge-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .challenge-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: #292524; }
+    .challenge-sub { font-size: 0.84rem; color: #78716c; margin-top: 4px; }
+    .challenge-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .amber-btn { background: var(--amber-btn); color: #fff; border: 1px solid var(--amber-btn); border-radius: 9px; padding: 8px 14px; font-weight: 700; font-size: 0.85rem; }
+    .amber-btn:hover { background: var(--amber-btn-hover); }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .filter-btn { border-radius: 9px; padding: 8px 14px; font-size: 0.85rem; font-weight: 700; border: 1px solid #cbd5e1; background: #fff; color: #334155; }
+    .filter-btn.primary-filter { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .filter-btn.selected-filter { outline: 2px solid var(--amber-btn); }
+
+    .unit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+    .unit-box { border: 1px solid var(--line); background: #f8fafc; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .unit-box label { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; flex: 1; }
+    .count-tag { font-size: 0.76rem; font-weight: 700; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 999px; }
+    .link-actions { display: flex; gap: 12px; font-size: 0.85rem; }
+    .link-btn { background: none; border: none; color: #334155; text-decoration: underline; padding: 2px 4px; font-weight: 600; }
+
+    .quiz-panel { display: none; }
+    .quiz-panel.active { display: block; }
+    .choice-list { display: grid; gap: 10px; margin: 12px 0; }
+    .choice-item { text-align: left; padding: 11px 14px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-weight: 600; }
+    .choice-item.picked { border-color: var(--navy); background: #eff6ff; }
+    .msg-box { margin-top: 12px; padding: 12px 14px; border-radius: 10px; display: none; font-size: 0.92rem; white-space: pre-wrap; }
+    .msg-box.show { display: block; }
+    .msg-box.ok { background: var(--ok-bg); color: var(--ok); border: 1px solid #bbf7d0; }
+    .msg-box.ng { background: var(--danger-bg); color: var(--danger); border: 1px solid #fecaca; }
+    .msg-box.info { background: #f8fafc; color: #1e293b; border: 1px solid var(--line); }
+
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
+      display: none; align-items: center; justify-content: center; padding: 16px; z-index: 60;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      width: 100%; max-width: 540px; background: #fff; border-radius: 14px;
+      padding: 20px; border: 1px solid var(--line); max-height: 88vh; overflow-y: auto;
+    }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .admin-editor { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed #cbd5e1; }
+    .admin-editor.open { display: block; }
+    .form-grid { display: grid; gap: 10px; margin-top: 10px; }
+    .notice-bar { font-size: 0.85rem; color: var(--ok); font-weight: 600; min-height: 1.2em; margin-top: 8px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-wrap">
+      <div class="brand-icon">学</div>
+      <div>
+        <div class="brand-title-row">
+          <span class="brand-name">テスト対策</span>
+          <span class="ver-pill">Ver.3.6</span>
+          <span class="subject-pill" id="headerSubjectBadge">言語文化</span>
+        </div>
+        <div class="brand-desc">画像解析でその場から問題作成・単元ON/OFF・問題専用ページ・類題チャレンジ</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="hdr-btn" id="btnRangePage">設定・範囲ページ</button>
+      <button type="button" class="hdr-btn lock-btn" id="btnAdminLock">🔒 管理者ロック中</button>
+      <button type="button" class="hdr-btn" id="btnJsonSave">JSON保存</button>
+      <button type="button" class="hdr-btn" id="btnJsonLoad">JSON読込</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- 誰でも使える：画像解析から問題作成 -->
+    <section class="card" id="imageScanCard">
+      <div class="section-tag">📷 画像解析で問題作成（ロック不要）</div>
+      <div class="card-head-row">
+        <h2 class="card-title">テスト範囲・プリント・教科書の写真から問題を自動生成</h2>
+      </div>
+
+      <div class="scan-box">
+        <input type="file" accept="image/*" id="scanImageInput" />
+        <img id="scanPreview" class="preview-img" alt="選択した画像プレビュー" />
+
+        <div class="scan-controls">
+          <select class="field-select" id="scanLangSelect" style="max-width: 220px;">
+            <option value="eng+jpn">英語＋日本語（推奨）</option>
+            <option value="eng">英語メイン</option>
+            <option value="jpn">日本語メイン</option>
+          </select>
+          <input type="text" class="field-input" id="scanUnitInput" placeholder="単元名（例：画像から作成・英単語）" style="max-width: 260px;" />
+          <button type="button" class="navy-btn" id="btnRunOcrGenerate">画像を解析して問題を作成</button>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <textarea class="field-textarea" id="ocrExtractedText" rows="4" placeholder="ここに画像から読み取ったテキストが表示されます（手動で修正してから「テキストから問題を追加」もできます）。"></textarea>
+        </div>
+        <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="amber-btn" id="btnAddFromText">このテキストから問題を追加</button>
+        </div>
+        <div class="notice-bar" id="scanNotice"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-tag">教科・科目スイッチ</div>
+      <div class="card-head-row">
+        <h2 class="card-title">学習する教科・科目を選択</h2>
+        <button type="button" class="ghost-btn" id="btnDeleteSubject">現在の科目を削除</button>
+      </div>
+      <div class="subject-bar">
+        <input type="text" class="field-input" id="newSubjectName" placeholder="新しい科目名（例：英語、数学、化学、日本史）" />
+        <select class="field-select" id="newSubjectPreset">
+          <option value="english">英語サンプル付き</option>
+          <option value="classic">言語文化サンプル付き</option>
+          <option value="empty">空の科目で作成</option>
+        </select>
+        <button type="button" class="navy-btn" id="btnAddSubject">+ 科目を追加</button>
+      </div>
+      <div class="subject-chips" id="subjectChips"></div>
+      <div class="notice-bar" id="globalNotice"></div>
+    </section>
+
+    <section class="challenge-card">
+      <div class="challenge-top">
+        <div>
+          <h2 class="challenge-title">💡 間違えた問題＆ヒント使用問題の「類題」チャレンジ</h2>
+          <div class="challenge-sub" id="challengeSummary">集計中...</div>
+        </div>
+        <div class="challenge-right">
+          <button type="button" class="amber-btn" id="btnGoChallenge">類題ページへ（0 問）</button>
+          <button type="button" class="ghost-btn" id="btnResetHistory">履歴リセット</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <button type="button" class="filter-btn primary-filter selected-filter" data-mode="mistake_or_hint">誤答＋ヒント使用</button>
+        <button type="button" class="filter-btn" data-mode="mistake_only">間違えた問題のみ</button>
+        <button type="button" class="filter-btn" data-mode="hint_only">ヒント使用のみ</button>
+      </div>
+    </section>
+
+    <section class="card" id="homeSettingsSection">
+      <div class="section-tag">◎ 出題セット・単元ON/OFF</div>
+      <h2 class="card-title">1. 問題セットを選択</h2>
+      <div style="margin-top: 8px; margin-bottom: 18px;">
+        <select class="field-select" id="setSelect" style="max-width: 340px;">
+          <option value="all">全問題セット</option>
+          <option value="basic">基礎・標準セット</option>
+          <option value="challenge">応用・チャレンジセット</option>
+        </select>
+      </div>
+      <div class="card-head-row" style="margin-bottom: 6px;">
+        <h2 class="card-title">2. 出題単元の ON / OFF スイッチ</h2>
+        <div class="link-actions">
+          <button type="button" class="link-btn" id="btnUnitsAllOn">すべて ON</button>
+          <button type="button" class="link-btn" id="btnUnitsAllOff">すべて OFF</button>
+        </div>
+      </div>
+      <div class="unit-grid" id="unitGrid"></div>
+      <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" class="navy-btn" id="btnStartQuiz">この条件で問題を開く</button>
+      </div>
+    </section>
+
+    <section class="card quiz-panel" id="quizSection">
+      <div class="card-head-row">
+        <div>
+          <span class="section-tag" id="qUnitLabel">単元</span>
+          <h2 class="card-title" id="qCounter" style="margin-top:4px;">問題 1 / 1</h2>
+        </div>
+        <button type="button" class="ghost-btn" id="btnBackToSettings">設定・範囲に戻る</button>
+      </div>
+      <p id="qPrompt" style="font-size: 1.05rem; font-weight: 700; white-space
+    <section class="card quiz-panel" id="quizSection">
+      <div class="card-head-row">
+        <div>
+          <span class="section-tag" id="qUnitLabel">単元</span>
+          <h2 class="card-title" id="qCounter" style="margin-top:4px;">問題 1 / 1</h2>
+        </div>
+        <button type="button" class="ghost-btn" id="btnBackToSettings">設定・範囲に戻る</button>
+      </div>
+      <p id="qPrompt" style="font-size: 1.05rem; font-weight: 700; white-space: pre-wrap;"></p>
+      <div class="choice-list" id="qChoices"></div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+        <button type="button" class="navy-btn" id="btnSubmitAns">解答する</button>
+        <button type="button" class="ghost-btn" id="btnShowHint">ヒント</button>
+        <button type="button" class="ghost-btn" id="btnShowExplain">解説</button>
+        <button type="button" class="amber-btn" id="btnShowSimilar">類題</button>
+      </div>
+      <div class="msg-box" id="qResultBox"></div>
+      <div class="msg-box info" id="qExtraBox"></div>
+      <div style="display:flex; justify-content:space-between; gap:10px; margin-top:16px; flex-wrap:wrap;">
+        <button type="button" class="ghost-btn" id="btnPrevQuestion">前の問題</button>
+        <button type="button" class="navy-btn" id="btnNextQuestion">次の問題</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="adminModal" aria-hidden="true">
+    <div class="modal-box">
+      <h3 style="margin-top:0;" id="modalTitle">管理者ロック解除</h3>
+      <p style="font-size:0.88rem; color:var(--muted);" id="modalDesc">
+        管理者モードを解除するにはパスコードを入力してください（初期値: <strong>1234</strong>）。
+      </p>
+      <div id="passcodeArea">
+        <input type="password" class="field-input" id="passcodeInput" placeholder="パスコードを入力（初期値: 1234）" />
+      </div>
+      <div class="admin-editor" id="adminEditor">
+        <strong>管理者用の詳細編集・問題追加</strong>
+        <div class="form-grid">
+          <input type="text" class="field-input" id="addUnitInput" placeholder="単元名（例：時制・助動詞）" />
+          <textarea class="field-textarea" id="addPromptInput" rows="2" placeholder="問題文を入力"></textarea>
+          <input type="text" class="field-input" id="addChoicesInput" placeholder="選択肢（カンマ区切り 例：go, goes, going, went）" />
+          <input type="text" class="field-input" id="addAnswerInput" placeholder="正解（選択肢と同じ文字列）" />
+          <input type="text" class="field-input" id="addHintInput" placeholder="ヒント" />
+          <input type="text" class="field-input" id="addExplainInput" placeholder="解説" />
+          <input type="text" class="field-input" id="addSimilarInput" placeholder="類題" />
+          <button type="button" class="navy-btn" id="btnSaveNewQuestion">この内容で問題を追加</button>
+        </div>
+      </div>
+      <div class="notice-bar" id="modalNotice"></div>
+      <div class="modal-actions">
+        <button type="button" class="ghost-btn" id="btnRelockAdmin" style="display:none;">ロックをかけ直す</button>
+        <button type="button" class="navy-btn" id="btnConfirmPasscode">解除する</button>
+        <button type="button" class="ghost-btn" id="btnCloseAdminModal">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="jsonModal" aria-hidden="true">
+    <div class="modal-box">
+      <h3 style="margin-top:0;" id="jsonModalTitle">JSON保存 / 読込</h3>
+      <textarea class="field-textarea" id="jsonModalText" rows="10" placeholder="ここにJSONデータを貼り付け、またはコピーしてください"></textarea>
+      <div class="notice-bar" id="jsonModalNotice"></div>
+      <div class="modal-actions">
+        <button type="button" class="navy-btn" id="btnApplyJsonModal" style="display:none;">JSONを読み込む</button>
+        <button type="button" class="ghost-btn" id="btnCloseJsonModal">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "test_taisaku_v36_classic_ui_v1";
+      const ADMIN_CODE = "1234";
+      const PRESETS = {
+        classic: [
+          {
+            id: "c1", unit: "文法・助動詞", setType: "basic",
+            prompt: "古文の助動詞「けり」の主な意味として最も適当なものはどれ？",
+            choices: ["過去・詠嘆", "打消・推量", "完了・強意", "希望・願望"],
+            answer: "過去・詠嘆",
+            hint: "和歌や物語で、ハッと気づいた気持ちを表すニュアンスがあります。",
+            explain: "「けり」は過去と詠嘆（〜たなあ）を表す助動詞です。",
+            similar: "「つ・ぬ」の主な意味の組み合わせは？ → 完了・強意"
+          },
+          {
+            id: "c2", unit: "文学史・平安", setType: "challenge",
+            prompt: "『枕草子』の作者は誰か？",
+            choices: ["清少納言", "紫式部", "和泉式部", "菅原孝標女"],
+            answer: "清少納言",
+            hint: "「春はあけぼの」で始まる随筆を書いた人物です。",
+            explain: "『枕草子』は清少納言によって書かれた随筆です。",
+            similar: "『源氏物語』の作者は誰か？ → 紫式部"
+          }
+        ],
+        english: [
+          {
+            id: "e1", unit: "現在形・三単現", setType: "basic",
+            prompt: "Ken (     ) soccer every Saturday.",
+            choices: ["play", "plays", "playing", "played"],
+            answer: "plays",
+            hint: "主語がKen（単数）で、every Saturdayという習慣を表します。",
+            explain: "三人称単数現在の動詞には -s をつけるので plays になります。",
+            similar: "Yumi (like) music. → likes"
+          }
+        ]
+      };
+
+      function createInitialData() {
+        return {
+          currentSubject: "言語文化",
+          subjects: {
+            "言語文化": {
+              questions: PRESETS.classic.slice(),
+              enabledUnits: ["文法・助動詞", "文学史・平安"],
+              mistakeIds: [],
+              hintIds: []
+            }
+          },
+          challengeMode: "mistake_or_hint",
+          selectedSet: "all"
+        };
+      }
+
+      function loadData() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.subjects && Object.keys(parsed.subjects).length > 0) return parsed;
+          }
+        } catch (err) {}
+        return createInitialData();
+      }
+
+      let appData = loadData();
+      let isAdminUnlocked = false;
+      let quizList = [];
+      let quizIndex = 0;
+      let pickedChoice = "";
+      let selectedImageDataUrl = "";
+
+      function persist() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); } catch (err) {}
+      }
+
+      function getSub() {
+        if (!appData.subjects[appData.currentSubject]) {
+          appData.currentSubject = Object.keys(appData.subjects)[0];
+        }
+        return appData.subjects[appData.currentSubject];
+      }
+
+      function setNotice(text) {
+        const el = document.getElementById("globalNotice");
+        if (el) el.textContent = text;
+      }
+
+      function setScanNotice(text, isErr = false) {
+        const el = document.getElementById("scanNotice");
+        if (el) {
+          el.style.color = isErr ? "var(--danger)" : "var(--ok)";
+          el.textContent = text;
+        }
+      }
+
+      function buildQuestionsFromText(rawText, unitName) {
+        const cleanLines = rawText
+          .split(/\r?\n/)
+          .map(line => line.trim())
+          .filter(line => line.length >= 4);
+
+        const candidates = [];
+        cleanLines.forEach(line => {
+          const engWords = line.match(/[A-Za-z]{4,}/g) || [];
+          const jpChunks = line.match(/[一-龠々ヶヵ]{2,6}|[ァ-ヶー]{3,8}/g) || [];
+          const pool = [...engWords, ...jpChunks].filter((w, i, arr) => arr.indexOf(w) === i);
+          if (pool.length > 0) {
+            const target = pool[0];
+            const masked = line.replace(target, "(     )");
+            const distractors = [];
+            for (const line2 of cleanLines) {
+              if (distractors.length >= 3) break;
+              const others = [...(line2.match(/[A-Za-z]{4,}/g) || []), ...(line2.match(/[一-龠々ヶヵ]{2,6}|[ァ-ヶー]{3,8}/g) || [])];
+              for (const cand of others) {
+                if (cand !== target && !distractors.includes(cand) && distractors.length < 3) {
+                  distractors.push(cand);
+                }
+              }
+            }
+            const fallbackChoices = ["選択肢A", "選択肢B", "選択肢C"];
+            while (distractors.length < 3) {
+              distractors.push(fallbackChoices[distractors.length]);
+            }
+            const choices = [target, ...distractors].sort(() => Math.random() - 0.5);
+            candidates.push({
+              id: "img_" + Date.now() + "_" + candidates.length,
+              unit: unitName || "画像解析から作成",
+              setType: "basic",
+              prompt: `次の空欄（　）に入る最も適当なものを選びなさい：\n${masked}`,
+              choices,
+              answer: target,
+              hint: `元の文脈：「${line.slice(0, 45)}」を思い出しましょう。`,
+              explain: `読み取ったテキストの該当箇所は「${target}」です（元文: ${line}）。`,
+              similar: `「${target}」の意味や使い方をノートでもう一度確認しよう。`
+            });
+          }
+        });
+
+        return candidates.slice(0, 10);
+      }
+
+      function addGeneratedQuestions(rawText) {
+        const text = (rawText || "").trim();
+        if (!text) {
+          setScanNotice("読み取ったテキストが空です。画像を選ぶかテキストを入力してください。", true);
+          return;
+        }
+        const unitName = (document.getElementById("scanUnitInput").value || "").trim() || "画像解析から作成";
+        const created = buildQuestionsFromText(text, unitName);
+        if (created.length === 0) {
+          setScanNotice("問題化できる語句が見つかりませんでした。テキストを少し調整して再試行してください。", true);
+          return;
+        }
+        const sub = getSub();
+        sub.questions.push(...created);
+        if (!sub.enabledUnits.includes(unitName)) {
+          sub.enabledUnits.push(unitName);
+        }
+        persist();
+        renderAll();
+        setScanNotice(`画像テキストから ${created.length} 問を作成し、単元「${unitName}」に追加しました！`);
+      }
+
+      function getChallengeTargetQuestions() {
+        const sub = getSub();
+        const mSet = new Set(sub.mistakeIds || []);
+        const hSet = new Set(sub.hintIds || []);
+        return sub.questions.filter(q => {
+          if (appData.challengeMode === "mistake_only") return mSet.has(q.id);
+          if (appData.challengeMode === "hint_only") return hSet.has(q.id);
+          return mSet.has(q.id) || hSet.has(q.id);
+        });
+      }
+
+      function renderHeaderAndSubjects() {
+        const sub = getSub();
+        document.getElementById("headerSubjectBadge").textContent = appData.currentSubject;
+        const lockBtn = document.getElementById("btnAdminLock");
+        lockBtn.textContent = isAdminUnlocked ? "🔓 管理者解除中" : "🔒 管理者ロック中";
+        lockBtn.classList.toggle("unlocked", isAdminUnlocked);
+
+        const chips = document.getElementById("subjectChips");
+        chips.innerHTML = "";
+        Object.keys(appData.subjects).forEach(name => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "chip-btn" + (name === appData.currentSubject ? " active" : "");
+          btn.textContent = name;
+          btn.addEventListener("click", () => {
+            appData.currentSubject = name;
+            persist();
+            renderAll();
+            setNotice(`「${name}」に切り替えました。`);
+          });
+          chips.appendChild(btn);
+        });
+
+        const targets = getChallengeTargetQuestions();
+        document.getElementById("challengeSummary").textContent =
+          `対象: ${targets.length} 問（誤答 ${(sub.mistakeIds || []).length} 件 / ヒント使用 ${(sub.hintIds || []).length} 件）`;
+        document.getElementById("btnGoChallenge").textContent = `類題ページへ（${targets.length} 問）`;
+
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+          btn.classList.toggle("selected-filter", btn.dataset.mode === appData.challengeMode);
+        });
+        document.getElementById("setSelect").value = appData.selectedSet || "all";
+      }
+
+      function renderUnits() {
+        const sub = getSub();
+        const unitGrid = document.getElementById("unitGrid");
+        unitGrid.innerHTML = "";
+        const unitNames = Array.from(new Set(sub.questions.map(q => q.unit)));
+        if (!Array.isArray(sub.enabledUnits)) sub.enabledUnits = unitNames.slice();
+
+        unitNames.forEach(uName => {
+          const cnt = sub.questions.filter(q => q.unit === uName).length;
+          const box = document.createElement("div");
+          box.className = "unit-box";
+          const lbl = document.createElement("label");
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = sub.enabledUnits.includes(uName);
+          cb.addEventListener("change", () => {
+            if (cb.checked) {
+              if (!sub.enabledUnits.includes(uName)) sub.enabledUnits.push(uName);
+            } else {
+              if (sub.enabledUnits.length <= 1) {
+                cb.checked = true;
+                setNotice("出題単元は最低1つONにしてください。");
+                return;
+              }
+              sub.enabledUnits = sub.enabledUnits.filter(x => x !== uName);
+            }
+            persist();
+          });
+          const txt = document.createElement("span");
+          txt.textContent = uName;
+          const badge = document.createElement("span");
+          badge.className = "count-tag";
+          badge.textContent = `${cnt}問`;
+          lbl.appendChild(cb);
+          lbl.appendChild(txt);
+          box.appendChild(lbl);
+          box.appendChild(badge);
+          unitGrid.appendChild(box);
+        });
+      }
+
+      function renderAll() {
+        renderHeaderAndSubjects();
+        renderUnits();
+      }
+
+      function openQuiz(list) {
+        if (!list || list.length === 0) {
+          setNotice("出題できる問題がありません。");
+          return;
+        }
+        quizList = list.slice();
+        quizIndex = 0;
+        document.getElementById("homeSettingsSection").style.display = "none";
+        document.getElementById("imageScanCard").style.display = "none";
+        document.getElementById("quizSection").classList.add("active");
+        renderQuizCard();
+      }
+
+      function backToHome() {
+        document.getElementById("quizSection").classList.remove("active");
+        document.getElementById("homeSettingsSection").style.display = "block";
+        document.getElementById("imageScanCard").style.display = "block";
+        renderAll();
+      }
+
+      function renderQuizCard() {
+        const q = quizList[quizIndex];
+        pickedChoice = "";
+        document.getElementById("qUnitLabel").textContent = q.unit;
+        document.getElementById("qCounter").textContent = `問題 ${quizIndex + 1} / ${quizList.length}`;
+        document.getElementById("qPrompt").textContent = q.prompt;
+        const resBox = document.getElementById("qResultBox");
+        const extraBox = document.getElementById("qExtraBox");
+        resBox.className = "msg-box"; resBox.textContent = "";
+        extraBox.className = "msg-box info"; extraBox.textContent = "";
+
+        const choicesEl = document.getElementById("qChoices");
+        choicesEl.innerHTML = "";
+        (q.choices || []).forEach(c => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "choice-item";
+          btn.textContent = c;
+          btn.addEventListener("click", () => {
+            pickedChoice = c;
+            choicesEl.querySelectorAll(".choice-item").forEach(el => el.classList.remove("picked"));
+            btn.classList.add("picked");
+          });
+          choicesEl.appendChild(btn);
+        });
+      }
+
+      function openAdminModal() {
+        const modal = document.getElementById("adminModal");
+        const editor = document.getElementById("adminEditor");
+        const relockBtn = document.getElementById("btnRelockAdmin");
+        const confirmBtn = document.getElementById("btnConfirmPasscode");
+        const passArea = document.getElementById("passcodeArea");
+        document.getElementById("modalNotice").textContent = "";
+
+        if (isAdminUnlocked) {
+          document.getElementById("modalTitle").textContent = "管理者メニュー（解除中）";
+          document.getElementById("modalDesc").textContent = "問題追加などの操作ができます。";
+          passArea.style.display = "none";
+          confirmBtn.style.display = "none";
+          relockBtn.style.display = "inline-block";
+          editor.classList.add("open");
+        } else {
+          document.getElementById("modalTitle").textContent = "管理者ロック解除";
+          document.getElementById("modalDesc").innerHTML = "パスコードを入力してください（初期値: <strong>1234</strong>）。";
+          passArea.style.display = "block";
+          confirmBtn.style.display = "inline-block";
+          relockBtn.style.display = "none";
+          editor.classList.remove("open");
+          document.getElementById("passcodeInput").value = "";
+        }
+        modal.classList.add("open");
+      }
+
+      function openJsonModal(mode) {
+        const modal = document.getElementById("jsonModal");
+        const title = document.getElementById("jsonModalTitle");
+        const txt = document.getElementById("jsonModalText");
+        const applyBtn = document.getElementById("btnApplyJsonModal");
+        document.getElementById("jsonModalNotice").textContent = "";
+        if (mode === "save") {
+          title.textContent = "JSON保存（コピーしてバックアップ）";
+          txt.value = JSON.stringify(appData, null, 2);
+          applyBtn.style.display = "none";
+        } else {
+          title.textContent = "JSON読込";
+          txt.value = "";
+          applyBtn.style.display = "inline-block";
+        }
+        modal.classList.add("open");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("scanImageInput").addEventListener("change", e => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = ev => {
+            selectedImageDataUrl = ev.target.result;
+            const img = document.getElementById("scanPreview");
+            img.src = selectedImageDataUrl;
+            img.classList.add("show");
+            setScanNotice("画像を読み込みました。「画像を解析して問題を作成」を押してください。");
+          };
+          reader.readAsDataURL(file);
+        });
+
+        document.getElementById("btnRunOcrGenerate").addEventListener("click", async () => {
+          if (!selectedImageDataUrl) {
+            setScanNotice("先に画像ファイルを選択してください。", true);
+            return;
+          }
+          if (!window.Tesseract) {
+            setScanNotice("OCRライブラリの読み込みに失敗しました。通信状況を確認してください。", true);
+            return;
+          }
+          const lang = document.getElementById("scanLangSelect").value;
+          setScanNotice("画像を解析中...（初回は言語データの読み込みに少し時間がかかります）");
+          try {
+            const result = await window.Tesseract.recognize(selectedImageDataUrl, lang);
+            const text = (result && result.data && result.data.text) ? result.data.text.trim() : "";
+            document.getElementById("ocrExtractedText").value = text;
+            addGeneratedQuestions(text);
+          } catch (err) {
+            setScanNotice("画像解析中にエラーが発生しました。別の画像かテキスト入力をお試しください。", true);
+          }
+        });
+
+        document.getElementById("btnAddFromText").addEventListener("click", () => {
+          addGeneratedQuestions(document.getElementById("ocrExtractedText").value);
+        });
+
+        document.getElementById("btnRangePage").addEventListener("click", () => {
+          backToHome();
+          document.getElementById("homeSettingsSection").scrollIntoView({ behavior: "smooth" });
+        });
+        document.getElementById("btnAdminLock").addEventListener("click", openAdminModal);
+        document.getElementById("btnJsonSave").addEventListener("click", () => openJsonModal("save"));
+        document.getElementById("btnJsonLoad").addEventListener("click", () => openJsonModal("load"));
+
+        document.getElementById("btnAddSubject").addEventListener("click", () => {
+          const nameInput = document.getElementById("newSubjectName");
+          const name = nameInput.value.trim();
+          const presetKey = document.getElementById("newSubjectPreset").value;
+          if (!name) { setNotice("新しい科目名を入力してください。"); return; }
+          const qs = presetKey === "empty" ? [] : (PRESETS[presetKey] || []).map((q, i) => ({
+            ...q, id: `${name}_${Date.now()}_${i}`
+          }));
+          appData.subjects[name] = {
+            questions: qs,
+            enabledUnits: Array.from(new Set(qs.map(q => q.unit))),
+            mistakeIds: [],
+            hintIds: []
+          };
+          appData.currentSubject = name;
+          nameInput.value = "";
+          persist();
+          renderAll();
+          setNotice(`科目「${name}」を追加しました。`);
+        });
+
+        document.getElementById("btnDeleteSubject").addEventListener("click", () => {
+          const keys = Object.keys(appData.subjects);
+          if (keys.length <= 1) { setNotice("最後の1科目は削除できません。"); return; }
+          const delName = appData.currentSubject;
+          delete appData.subjects[delName];
+          appData.currentSubject = Object.keys(appData.subjects)[0];
+          persist();
+          renderAll();
+          setNotice(`科目「${delName}」を削除しました。`);
+        });
+
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            appData.challengeMode = btn.dataset.mode;
+            persist();
+            renderAll();
+          });
+        });
+
+        document.getElementById("btnGoChallenge").addEventListener("click", () => {
+          const targets = getChallengeTargetQuestions();
+          if (targets.length === 0) { setNotice("現在の条件に該当する類題対象問題はありません。"); return; }
+          openQuiz(targets);
+        });
+
+        document.getElementById("btnResetHistory").addEventListener("click", () => {
+          const sub = getSub();
+          sub.mistakeIds = [];
+          sub.hintIds = [];
+          persist();
+          renderAll();
+          setNotice("誤答・ヒント履歴をリセットしました。");
+        });
+
+        document.getElementById("setSelect").addEventListener("change", e => {
+          appData.selectedSet = e.target.value;
+          persist();
+        });
+
+        document.getElementById("btnUnitsAllOn").addEventListener("click", () => {
+          const sub = getSub();
+          sub.enabledUnits = Array.from(new Set(sub.questions.map(q => q.unit)));
+          persist();
+          renderUnits();
+        });
+
+        document.getElementById("btnUnitsAllOff").addEventListener("click", () => {
+          const sub = getSub();
+          const units = Array.from(new Set(sub.questions.map(q => q.unit)));
+          sub.enabledUnits = units.length > 0 ? [units[0]] : [];
+          persist();
+          renderUnits();
+        });
+
+        document.getElementById("btnStartQuiz").addEventListener("click", () => {
+          const sub = getSub();
+          const filtered = sub.questions.filter(q => {
+            const unitOk = sub.enabledUnits.includes(q.unit);
+            const setOk = appData.selectedSet === "all" || q.setType === appData.selectedSet;
+            return unitOk && setOk;
+          });
+          openQuiz(filtered.length > 0 ? filtered : sub.questions);
+        });
+
+        document.getElementById("btnBackToSettings").addEventListener("click", backToHome);
+        document.getElementById("btnPrevQuestion").addEventListener("click", () => {
+          quizIndex = (quizIndex - 1 + quizList.length) % quizList.length;
+          renderQuizCard();
+        });
+        document.getElementById("btnNextQuestion").addEventListener("click", () => {
+          quizIndex = (quizIndex + 1) % quizList.length;
+          renderQuizCard();
+        });
+
+        document.getElementById("btnSubmitAns").addEventListener("click", () => {
+          const q = quizList[quizIndex];
+          const sub = getSub();
+          const resBox = document.getElementById("qResultBox");
+          if (!pickedChoice) {
+            resBox.className = "msg-box ng show";
+            resBox.textContent = "選択肢を選んでから「解答する」を押してください。";
+            return;
+          }
+          if (pickedChoice === q.answer) {
+            resBox.className = "msg-box ok show";
+            resBox.textContent = `正解！「${q.answer}」です。`;
+          } else {
+            if (!sub.mistakeIds.includes(q.id)) sub.mistakeIds.push(q.id);
+            persist();
+            resBox.className = "msg-box ng show";
+            resBox.textContent = `不正解（正解: ${q.answer}）。類題チャレンジ対象に記録しました。`;
+          }
+        });
+
+        document.getElementById("btnShowHint").addEventListener("click", () => {
+          const q = quizList[quizIndex];
+          const sub = getSub();
+          if (!sub.hintIds.includes(q.id)) { sub.hintIds.push(q.id); persist(); }
+          const extra = document.getElementById("qExtraBox");
+          extra.className = "msg-box info show";
+          extra.textContent = `【ヒント】${q.hint || "問題文をよく読んでみましょう。"}`;
+        });
+
+        document.getElementById("btnShowExplain").addEventListener("click", () => {
+          const q = quizList[quizIndex];
+          const extra = document.getElementById("qExtraBox");
+          extra.className = "msg-box info show";
+          extra.textContent = `【解説】${q.explain || `正解は「${q.answer}」です。`}`;
+        });
+
+        document.getElementById("btnShowSimilar").addEventListener("click", () => {
+          const q = quizList[quizIndex];
+          const extra = document.getElementById("qExtraBox");
+          extra.className = "msg-box info show";
+          extra.textContent = `【類題】${q.similar || "類題データはありません。"}`;
+        });
+
+        document.getElementById("btnConfirmPasscode").addEventListener("click", () => {
+          const val = document.getElementById("passcodeInput").value.trim();
+          const notice = document.getElementById("modalNotice");
+          if (val === ADMIN_CODE) {
+            isAdminUnlocked = true;
+            openAdminModal();
+            renderHeaderAndSubjects();
+          } else {
+            notice.style.color = "var(--danger)";
+            notice.textContent = "パスコードが違います（初期値: 1234）。";
+          }
+        });
+
+        document.getElementById("btnRelockAdmin").addEventListener("click", () => {
+          isAdminUnlocked = false;
+          openAdminModal();
+          renderHeaderAndSubjects();
+        });
+
+        document.getElementById("btnCloseAdminModal").addEventListener("click", () => {
+          document.getElementById("adminModal").classList.remove("open");
+        });
+
+        document.getElementById("btnSaveNewQuestion").addEventListener("click", () => {
+          const sub = getSub();
+          const unit = document.getElementById("addUnitInput").value.trim() || "一般";
+          const prompt = document.getElementById("addPromptInput").value.trim();
+          const choices = document.getElementById("addChoicesInput").value.split(",").map(s => s.trim()).filter(Boolean);
+          const answer = document.getElementById("addAnswerInput").value.trim();
+          const hint = document.getElementById("addHintInput").value.trim();
+          const explain = document.getElementById("addExplainInput").value.trim();
+          const similar = document.getElementById("addSimilarInput").value.trim();
+          const notice = document.getElementById("modalNotice");
+          if (!prompt || !answer) {
+            notice.style.color = "var(--danger)";
+            notice.textContent = "問題文と正解を入力してください。";
+            return;
+          }
+          sub.questions.push({
+            id: "q_" + Date.now(), unit, setType: "basic", prompt,
+            choices: choices.length > 0 ? choices : [answer],
+            answer, hint, explain, similar
+          });
+          if (!sub.enabledUnits.includes(unit)) sub.enabledUnits.push(unit);
+          persist();
+          renderAll();
+          document.getElementById("addPromptInput").value = "";
+          document.getElementById("addChoicesInput").value = "";
+          document.getElementById("addAnswerInput").value = "";
+          notice.style.color = "var(--ok)";
+          notice.textContent = "問題を追加しました！";
+        });
+
+        document.getElementById("btnApplyJsonModal").addEventListener("click", () => {
+          const notice = document.getElementById("jsonModalNotice");
+          try {
+            const parsed = JSON.parse(document.getElementById("jsonModalText").value);
+            if (!parsed || !parsed.subjects) throw new Error("invalid");
+            appData = parsed;
+            persist();
+            renderAll();
+            notice.style.color = "var(--ok)";
+            notice.textContent = "JSONデータを読み込みました。";
+          } catch (e) {
+            notice.style.color = "var(--danger)";
+            notice.textContent = "JSONの形式が正しくありません。";
+          }
+        });
+
+        document.getElementById("btnCloseJsonModal").addEventListener("click", () => {
+          document.getElementById("jsonModal").classList.remove("open");
+        });
+
+        renderAll();
+      });
+    })();
+  </script>
+</body>
+</html>
+
