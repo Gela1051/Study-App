@@ -1,0 +1,2390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>テスト対策 Ver.3.6（範囲から問題自動生成・単元ON/OFF・管理者ロック）</title>
+  <style>
+    :root {
+      --bg: #f4f3ef;
+      --surface: #ffffff;
+      --surface-alt: #efece4;
+      --ink: #17202a;
+      --muted: #566270;
+      --primary: #16325b;
+      --primary-dark: #0e2240;
+      --primary-soft: #e8eef7;
+      --accent: #b88424;
+      --accent-soft: #fdf5e4;
+      --success: #18794e;
+      --success-soft: #e6f5ee;
+      --danger: #c6362d;
+      --danger-soft: #fdeceb;
+      --hint: #9a5b00;
+      --hint-soft: #fff3d6;
+      --border: #dad5c8;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow-sm: 0 2px 10px rgba(23, 32, 42, 0.06);
+      --shadow-md: 0 12px 30px rgba(23, 32, 42, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background-color: var(--bg);
+      background-image: radial-gradient(#ddd6c5 0.75px, transparent 0.75px);
+      background-size: 18px 18px;
+      color: var(--ink);
+      line-height: 1.65;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 16px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: #fff;
+      border-bottom: 3px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #d49e35, var(--accent));
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.08rem;
+      font-weight: 800;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-ver {
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+
+    .pill-subj {
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: #d6e0ee;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .hdr-btn {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 9px 14px;
+      min-height: 40px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hdr-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .hdr-btn.locked {
+      background: rgba(255, 243, 214, 0.22);
+      border-color: #ffd97d;
+      color: #fff3d6;
+    }
+
+    main {
+      max-width: 1080px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 64px;
+      flex: 1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 18px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--primary);
+      background: var(--primary-soft);
+      padding: 4px 11px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .card-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 1.14rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 14px;
+    }
+
+    .subject-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .subject-chip {
+      padding: 10px 16px;
+      min-height: 44px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .subject-chip.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .subject-creator {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      align-items: center;
+    }
+
+    .input, .select, .textarea {
+      font-family: inherit;
+      font-size: 0.94rem;
+      padding: 11px 14px;
+      min-height: 44px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .input:focus, .select:focus, .textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(22, 50, 91, 0.12);
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .ruidai-card {
+      background: linear-gradient(135deg, #fffdf8 0%, var(--accent-soft) 100%);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .ruidai-card h2 {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+    }
+
+    .ruidai-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 12px 18px;
+      min-height: 46px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-sm {
+      padding: 8px 13px;
+      min-height: 38px;
+      font-size: 0.82rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #cf9832, var(--accent));
+      color: #fff;
+    }
+
+    .btn-hint {
+      background: var(--hint-soft);
+      color: var(--hint);
+      border-color: #e4b654;
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--primary);
+      border-color: var(--border);
+    }
+
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--danger);
+      border-color: rgba(198, 54, 45, 0.35);
+    }
+
+    .set-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .set-btn {
+      border: 2px solid var(--border);
+      background: var(--bg);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      min-height: 64px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .set-btn.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .set-btn-title {
+      display: block;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--primary-dark);
+    }
+
+    .set-btn-desc {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 4px 8px;
+      min-height: 36px;
+    }
+
+    /* Unit ON / OFF Grid */
+    .unit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .unit-card-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 15px;
+      min-height: 58px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      background: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .unit-card-switch.on {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+
+    .unit-card-switch.off {
+      opacity: 0.72;
+      background: var(--surface-alt);
+    }
+
+    .unit-state-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+    }
+
+    .unit-card-switch.on .unit-state-label {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .unit-card-switch.off .unit-state-label {
+      background: #cbd5e1;
+      color: #334155;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+
+    .opt-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .opt-label {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .toggle-flex {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 54px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #c5cbd4;
+      border-radius: 999px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+
+    input:checked + .slider {
+      background: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .mini-pill {
+      flex: 1;
+      min-width: 64px;
+      min-height: 40px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .mini-pill.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .gen-box {
+      background: linear-gradient(135deg, #f8fafc 0%, var(--primary-soft) 100%);
+      border: 1.5px solid #b6c8e4;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .drop-area {
+      border: 2px dashed var(--primary);
+      background: var(--bg);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .drop-area.drag-over {
+      background: var(--primary-soft);
+      border-color: var(--accent);
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .img-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .img-preview-box {
+      height: 140px;
+      background: #141c26;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .img-preview-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .img-card-body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .builder-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+
+    .builder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+    }
+
+    .lock-banner {
+      background: var(--hint-soft);
+      border: 1.5px solid #e4b654;
+      color: var(--hint);
+      border-radius: var(--radius-md);
+      padding: 12px 15px;
+      margin-bottom: 14px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    /* Quiz Dedicated View */
+    .quiz-top {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quiz-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .badge {
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .badge-num { background: var(--primary); color: #fff; }
+    .badge-unit { background: var(--primary-soft); color: var(--primary); }
+    .badge-ruidai { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+    .badge-hint { background: var(--hint-soft); color: var(--hint); border: 1px solid #e4b654; }
+    .badge-mistake { background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(198, 54, 45, 0.35); }
+
+    .progress-bar {
+      width: 100%;
+      height: 9px;
+      background: var(--surface-alt);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.25s ease;
+    }
+
+    .jump-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .jump-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .jump-btn.done { background: var(--primary-soft); border-color: var(--primary); color: var(--primary-dark); }
+    .jump-btn.now { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .passage {
+      background: var(--surface-alt);
+      border-left: 4px solid var(--accent);
+      padding: 14px 16px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: 14px;
+      font-size: 1rem;
+      color: var(--primary-dark);
+    }
+
+    .hint-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .hint-box {
+      background: var(--hint-soft);
+      border: 1.5px solid #e4b654;
+      color: var(--hint);
+      border-radius: var(--radius-md);
+      padding: 13px 16px;
+      margin-bottom: 16px;
+      font-size: 0.94rem;
+    }
+
+    .q-text {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 16px;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .choice {
+      width: 100%;
+      min-height: 56px;
+      text-align: left;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: inherit;
+      font-size: 0.98rem;
+      color: var(--ink);
+    }
+
+    .choice:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .choice.selected {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      font-weight: 700;
+    }
+
+    .choice.correct {
+      border-color: var(--success);
+      background: var(--success-soft);
+      color: #0f4f32;
+      font-weight: 700;
+    }
+
+    .choice.wrong {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+      color: #7c1c16;
+    }
+
+    .choice-key {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--surface-alt);
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .choice.selected .choice-key { background: var(--primary); color: #fff; }
+    .choice.correct .choice-key { background: var(--success); color: #fff; }
+    .choice.wrong .choice-key { background: var(--danger); color: #fff; }
+
+    .feedback {
+      margin-top: 18px;
+      padding: 15px 18px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+    }
+
+    .feedback.ok { background: var(--success-soft); border-color: rgba(24, 121, 78, 0.35); }
+    .feedback.ng { background: var(--danger-soft); border-color: rgba(198, 54, 45, 0.35); }
+
+    .feedback-title {
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .feedback.ok .feedback-title { color: var(--success); }
+    .feedback.ng .feedback-title { color: var(--danger); }
+
+    .quiz-nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .score-tile {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 15px;
+      text-align: center;
+    }
+
+    .score-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .score-val {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+
+    .rank-pill {
+      display: inline-block;
+      padding: 2px 14px;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .rank-S { background: var(--accent-soft); color: var(--accent); border: 2px solid var(--accent); }
+    .rank-A { background: var(--success-soft); color: var(--success); border: 2px solid var(--success); }
+    .rank-B { background: var(--primary-soft); color: var(--primary); border: 2px solid var(--primary); }
+    .rank-C { background: var(--danger-soft); color: var(--danger); border: 2px solid var(--danger); }
+
+    .bar-row { margin-bottom: 11px; }
+    .bar-head { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+    .bar-track { height: 10px; background: var(--surface-alt); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--primary); border-radius: 999px; }
+
+    .review-card { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 15px; margin-bottom: 11px; background: #fff; }
+    .review-card.ok { border-left: 4px solid var(--success); }
+    .review-card.ng { border-left: 4px solid var(--danger); }
+    .review-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .review-exp { background: var(--bg); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 0.86rem; color: var(--muted); margin-top: 8px; }
+
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(12, 18, 28, 0.78);
+      z-index: 70;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      max-width: 540px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: auto;
+      padding: 20px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .modal-box.wide {
+      max-width: 860px;
+    }
+
+    .modal-box img {
+      width: 100%;
+      max-height: 66vh;
+      object-fit: contain;
+      background: #141c26;
+      border-radius: var(--radius-sm);
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary-dark);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-md);
+      z-index: 95;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.65);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-logo">学</div>
+        <div>
+          <div class="brand-title">
+            テスト対策 <span class="pill-ver">Ver.3.6</span>
+            <span class="pill-subj" id="hdr-subject-name">言語文化</span>
+          </div>
+          <div class="brand-sub">範囲からその場で問題作成・単元ON/OFF・問題専用ページ・管理者ロック</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="hdr-btn" id="btn-go-home">設定・範囲ページ</button>
+        <button type="button" class="hdr-btn locked" id="btn-toggle-lock">🔒 管理者ロック中</button>
+        <button type="button" class="hdr-btn" id="btn-export">JSON保存</button>
+        <label class="hdr-btn" style="cursor:pointer;">
+          JSON読込 <input type="file" id="file-import" accept="application/json" style="display:none;" />
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- SETUP & RANGE MANAGEMENT VIEW -->
+    <section id="view-home" class="fade-in">
+      <!-- Subject Switcher -->
+      <div class="card">
+        <span class="section-tag">教科・科目スイッチ</span>
+        <div class="card-head">
+          <span>学習する教科・科目を選択</span>
+          <button type="button" class="btn btn-danger-ghost btn-sm admin-only-btn" id="btn-del-subject">現在の科目を削除</button>
+        </div>
+        <div class="subject-list" id="subject-list"></div>
+        <div class="subject-creator admin-only-block">
+          <input type="text" id="new-subject-title" class="input" placeholder="新しい科目名（例：英語、数学、化学、日本史）" style="flex:1; min-width:210px;" />
+          <select id="new-subject-template" class="select">
+            <option value="english">英語サンプル付き</option>
+            <option value="math">数学サンプル付き</option>
+            <option value="science">理科サンプル付き</option>
+            <option value="social">社会サンプル付き</option>
+            <option value="blank">空の科目（範囲入力・自動生成用）</option>
+          </select>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-create-subject">＋ 科目を追加</button>
+        </div>
+      </div>
+
+      <!-- Similar Questions Banner -->
+      <div class="ruidai-card">
+        <div style="flex:1; min-width:260px;">
+          <h2>💡 間違えた問題＆ヒント使用問題の「類題」チャレンジ</h2>
+          <p id="ruidai-summary">集計中...</p>
+          <div class="filter-row" id="ruidai-scope-pills">
+            <button type="button" class="mini-pill active" data-scope="ALL_TARGET">誤答＋ヒント使用</button>
+            <button type="button" class="mini-pill" data-scope="MISTAKE_ONLY">間違えた問題のみ</button>
+            <button type="button" class="mini-pill" data-scope="HINT_ONLY">ヒント使用のみ</button>
+          </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+          <button type="button" class="btn btn-accent" id="btn-start-ruidai">
+            類題ページへ（<span id="ruidai-count">0</span>問）
+          </button>
+          <button type="button" class="btn btn-danger-ghost btn-sm admin-only-btn" id="btn-reset-history">
+            履歴リセット
+          </button>
+        </div>
+      </div>
+
+      <!-- Problem Set & Unit ON/OFF -->
+      <div class="card">
+        <span class="section-tag">① 出題セット・単元ON/OFF</span>
+        <div class="card-head"><span>1. 問題セットを選択</span></div>
+        <div class="set-grid" id="set-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span>2. 出題単元の ON / OFF スイッチ</span>
+          <div>
+            <button type="button" class="link-btn" id="btn-select-all-units">すべて ON</button>
+            <button type="button" class="link-btn" id="btn-clear-all-units">すべて OFF</button>
+          </div>
+        </div>
+        <div class="unit-grid" id="unit-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span>3. 出題オプション・問題専用ページ開始</span></div>
+        <div class="options-grid">
+          <div class="opt-card">
+            <div class="toggle-flex">
+              <div>
+                <div class="opt-label">問題順をランダム</div>
+                <div style="font-size:0.78rem; color:var(--muted);">毎回出題順を変更</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="chk-shuffle-q" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="opt-card">
+            <div class="toggle-flex">
+              <div>
+                <div class="opt-label">選択肢順をランダム</div>
+                <div style="font-size:0.78rem; color:var(--muted);">位置の丸暗記を防止</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="chk-shuffle-c" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="opt-card">
+            <div class="opt-label">出題数</div>
+            <div class="pill-row" id="count-pills">
+              <button type="button" class="mini-pill" data-qcount="5">5問</button>
+              <button type="button" class="mini-pill active" data-qcount="10">10問</button>
+              <button type="button" class="mini-pill" data-qcount="15">15問</button>
+              <button type="button" class="mini-pill" data-qcount="ALL">全問</button>
+            </div>
+          </div>
+
+          <div class="opt-card">
+            <div class="opt-label">解答・採点スタイル</div>
+            <div class="pill-row" id="mode-pills">
+              <button type="button" class="mini-pill active" data-qmode="instant">一問一答</button>
+              <button type="button" class="mini-pill" data-qmode="exam">テスト一括採点</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+          <div id="pool-info" style="font-size:0.9rem; font-weight:700; color:var(--muted);"></div>
+          <button type="button" class="btn btn-primary" id="btn-start-quiz" style="min-width:230px; font-size:1rem;">
+            問題専用ページを開く →
+          </button>
+        </div>
+      </div>
+
+      <!-- Test Range Text/Detail + Instant Question Generator + Images + Manual Builder -->
+      <div class="card">
+        <span class="section-tag">② テスト範囲（言葉・詳細・画像）＆ その場で問題作成</span>
+        <div class="card-head">
+          <span>テスト範囲の言葉・詳細メモと問題自動生成</span>
+          <span id="img-count-label" style="font-size:0.84rem; color:var(--muted);">0枚</span>
+        </div>
+
+        <div class="lock-banner" id="lock-status-banner">
+          <span id="lock-banner-text">🔒 現在「管理者ロック中」です。問題生成・追加・範囲編集・履歴リセットを行うには解除してください（初期パスコード：1234）。</span>
+          <button type="button" class="btn btn-hint btn-sm" id="btn-banner-unlock">パスコード解除</button>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <label for="scope-memo" class="field-label">テスト範囲・出題詳細（言葉・文章・箇条書き・重要語句など）</label>
+          <textarea id="scope-memo" class="textarea" placeholder="例：助動詞「る・らる・す・さす」の意味と接続。漢文の再読文字「未・将・猶」。歴史の明治憲法と日清・日露戦争のポイント。"></textarea>
+          <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">
+            ※ ここに書いたテスト範囲の言葉や文面をもとに、下の「その場で問題自動生成」から4択問題をまとめて作れます。
+          </div>
+        </div>
+
+        <div class="gen-box admin-only-block">
+          <div style="font-weight:800; font-size:0.96rem; color:var(--primary-dark); margin-bottom:10px;">
+            ⚡ テスト範囲に応じてその場で問題を自動生成（ヒント・解説・類題つき）
+          </div>
+          <div class="builder-grid">
+            <div>
+              <label class="field-label" for="gen-unit">出題単元名</label>
+              <input type="text" id="gen-unit" class="input" style="width:100%;" placeholder="例：古文（助動詞）や 化学（酸・塩基）" />
+            </div>
+            <div>
+              <label class="field-label" for="gen-count">一度に作る問題数</label>
+              <select id="gen-count" class="select" style="width:100%;">
+                <option value="3">3問作成</option>
+                <option value="5" selected>5問作成</option>
+                <option value="8">8問作成</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label class="field-label" for="gen-source-text">範囲の言葉・重要フレーズ・説明文（空欄の場合は上の「テスト範囲・出題詳細」を使用）</label>
+            <textarea id="gen-source-text" class="textarea" style="min-height:74px;" placeholder="例：助動詞「べし」は推量・意志・可能・当然・命令・適当の6つの意味を持つ。接続は終止形（ラ変型は連体形）。"></textarea>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px;">
+            <span style="font-size:0.78rem; color:var(--muted);">※ 文中のキーワードや文節から空欄補充・要点確認・類題を自動生成して現在の科目に追加します。</span>
+            <button type="button" class="btn btn-accent" id="btn-generate-from-scope">⚡ 範囲から問題を自動生成</button>
+          </div>
+        </div>
+
+        <div class="drop-area admin-only-block" id="drop-area" tabindex="0">
+          <div style="font-weight:800; font-size:0.94rem; color:var(--primary-dark); margin-bottom:4px;">
+            テスト範囲の画像をドラッグ＆ドロップ、または貼り付け / ファイル選択
+          </div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-bottom:10px;">
+            教科書・プリント・範囲表の写真やスクショも保存できます
+          </div>
+          <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+            画像ファイルを選択
+            <input type="file" id="scope-file-input" accept="image/*" multiple style="display:none;" />
+          </label>
+        </div>
+
+        <div class="image-grid" id="image-grid"></div>
+
+        <div class="builder-box admin-only-block">
+          <div style="font-weight:800; font-size:0.95rem; color:var(--primary-dark); margin-bottom:10px;">
+            ＋ 手動で1問ずつ追加（ヒント・類題も同時作成）
+          </div>
+          <div class="builder-grid">
+            <div>
+              <label class="field-label" for="add-unit">単元名</label>
+              <input type="text" id="add-unit" class="input" style="width:100%;" placeholder="例：古文（助動詞・敬語）" />
+            </div>
+            <div>
+              <label class="field-label" for="add-q">問題文</label>
+              <input type="text" id="add-q" class="input" style="width:100%;" placeholder="問題文を入力" />
+            </div>
+          </div>
+
+          <div class="builder-grid">
+            <input type="text" id="add-c0" class="input" placeholder="選択肢1（正解）" />
+            <input type="text" id="add-c1" class="input" placeholder="選択肢2" />
+            <input type="text" id="add-c2" class="input" placeholder="選択肢3" />
+            <input type="text" id="add-c3" class="input" placeholder="選択肢4" />
+          </div>
+
+          <div class="builder-grid">
+            <div>
+              <label class="field-label" for="add-hint">ヒント（空欄なら自動生成）</label>
+              <input type="text" id="add-hint" class="input" style="width:100%;" placeholder="考える手がかり" />
+            </div>
+            <div>
+              <label class="field-label" for="add-exp">解説（空欄なら自動生成）</label>
+              <input type="text" id="add-exp" class="input" style="width:100%;" placeholder="正解の理由・ポイント" />
+            </div>
+          </div>
+
+          <div class="builder-grid">
+            <div>
+              <label class="field-label" for="add-rq">類題の問題文（空欄なら自動作成）</label>
+              <input type="text" id="add-rq" class="input" style="width:100%;" placeholder="同じ知識を問う類題" />
+            </div>
+            <div>
+              <label class="field-label" for="add-rans">類題の正解（空欄なら選択肢1を使用）</label>
+              <input type="text" id="add-rans" class="input" style="width:100%;" placeholder="類題の正解" />
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-add-question">この問題をセットに追加</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEDICATED QUESTION-ONLY VIEW -->
+    <section id="view-quiz" class="hidden fade-in">
+      <div class="quiz-top">
+        <div class="quiz-top-row">
+          <div class="badges">
+            <span class="badge badge-num" id="q-num-badge">第1問 / 10問</span>
+            <span class="badge badge-unit" id="q-unit-badge">単元</span>
+            <span class="badge badge-ruidai hidden" id="q-ruidai-badge">類題モード</span>
+            <span class="badge badge-hint hidden" id="q-hint-badge">💡 ヒント使用済み</span>
+            <span class="badge badge-mistake hidden" id="q-mistake-badge">✕ 誤答記録あり</span>
+          </div>
+          <div id="q-mode-text" style="font-size:0.84rem; font-weight:700; color:var(--muted);">一問一答</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="q-progress" style="width:0%;"></div>
+        </div>
+      </div>
+
+      <div class="jump-nav hidden" id="jump-nav"></div>
+
+      <div class="card">
+        <div class="passage hidden" id="q-passage"></div>
+
+        <div class="hint-bar">
+          <button type="button" class="btn btn-hint btn-sm" id="btn-hint">💡 ヒントを見る</button>
+          <span style="font-size:0.78rem; color:var(--muted);">※ ヒントを見ると類題チャレンジの対象になります</span>
+        </div>
+
+        <div class="hint-box hidden" id="q-hint-box"></div>
+        <div class="q-text" id="q-text"></div>
+        <div class="choices" id="q-choices"></div>
+
+        <div class="feedback hidden" id="q-feedback">
+          <div class="feedback-title">
+            <span id="fb-heading"></span>
+            <span id="fb-sub" style="font-size:0.8rem;"></span>
+          </div>
+          <div id="fb-exp" style="font-size:0.92rem;"></div>
+        </div>
+
+        <div class="quiz-nav">
+          <button type="button" class="btn btn-outline" id="btn-prev">← 前の問題</button>
+          <div style="display:flex; gap:10px; margin-left:auto;">
+            <button type="button" class="btn btn-primary" id="btn-next">次の問題へ →</button>
+            <button type="button" class="btn btn-accent hidden" id="btn-grade">採点結果を見る</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULT VIEW -->
+    <section id="view-result" class="hidden fade-in">
+      <div class="card">
+        <span class="section-tag">③ 自動採点・振り返り</span>
+        <div class="card-head">
+          <span id="res-title">採点結果</span>
+          <span id="res-subtitle" style="font-size:0.82rem; color:var(--muted);"></span>
+        </div>
+
+        <div class="score-grid">
+          <div class="score-tile">
+            <div class="score-label">100点換算スコア</div>
+            <div class="score-val"><span id="res-score">0</span><span style="font-size:1rem;">点</span></div>
+          </div>
+          <div class="score-tile">
+            <div class="score-label">正解数 / 出題数</div>
+            <div class="score-val"><span id="res-correct">0</span> / <span id="res-total">0</span></div>
+          </div>
+          <div class="score-tile">
+            <div class="score-label">正答率</div>
+            <div class="score-val"><span id="res-pct">0</span><span style="font-size:1rem;">%</span></div>
+          </div>
+          <div class="score-tile">
+            <div class="score-label">総合ランク</div>
+            <div><span class="rank-pill rank-B" id="res-rank">B</span></div>
+          </div>
+        </div>
+
+        <div style="padding:14px; border-radius:var(--radius-md); background:var(--accent-soft); border:1px solid var(--accent); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-bottom:20px;">
+          <div id="res-ruidai-note" style="font-size:0.88rem; font-weight:700; color:var(--primary-dark);"></div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button type="button" class="btn btn-accent" id="btn-res-ruidai">対象問題の類題を解く（<span id="res-ruidai-cnt">0</span>問）</button>
+            <button type="button" class="btn btn-outline" id="btn-res-retry">もう一度解く</button>
+            <button type="button" class="btn btn-primary" id="btn-res-home">設定・範囲ページへ</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:0.96rem; font-weight:800; color:var(--primary-dark); margin-bottom:10px;">単元別正答率</h3>
+          <div id="res-unit-bars"></div>
+        </div>
+
+        <div>
+          <h3 style="font-size:0.96rem; font-weight:800; color:var(--primary-dark); margin-bottom:10px;">全問の振り返り・解説</h3>
+          <div id="res-review-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Passcode Modal -->
+  <div class="modal-bg hidden" id="passcode-modal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <strong style="color:var(--primary-dark); font-size:1.05rem;">🔒 管理者パスコード解除</strong>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-close-passcode">閉じる</button>
+      </div>
+      <p style="font-size:0.86rem; color:var(--muted); margin-bottom:12px;">
+        問題の自動生成・追加、テスト範囲の編集、科目管理、履歴リセットを行うにはパスコードを入力してください（初期値：<code>1234</code>）。
+      </p>
+      <div style="display:flex; gap:8px;">
+        <input type="password" id="input-passcode" class="input" style="flex:1;" placeholder="パスコードを入力" inputmode="numeric" />
+        <button type="button" class="btn btn-primary" id="btn-submit-passcode">解除する</button>
+      </div>
+      <div id="passcode-error" style="color:var(--danger); font-size:0.82rem; font-weight:700; margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- Image Modal -->
+  <div class="modal-bg hidden" id="img-modal">
+    <div class="modal-box wide">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <strong id="modal-title" style="color:var(--primary-dark);">テスト範囲画像</strong>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-close-modal">閉じる</button>
+      </div>
+      <img id="modal-img" src="" alt="拡大画像" />
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <footer>
+    テスト対策 Ver.3.6 — 範囲からの問題自動生成・単元ON/OFF・問題専用ページ・管理者ロック対応
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const STORAGE_KEY = "test_taisaku_v36_standalone_v1";
+      const ADMIN_PASSCODE = "1234"; // 必要に応じて変更してください
+
+      const GENGO_UNITS = [
+        "古文（動詞・形容詞の活用）",
+        "古文（助動詞・敬語）",
+        "漢文（返り点・句法）",
+        "現代文（評論・小説読解語彙）",
+        "漢字・語彙・文学史"
+      ];
+
+      const GENGO_QUESTIONS = [
+        {
+          id: "G01", set: "A", unit: "古文（動詞・形容詞の活用）",
+          passage: "竹取の翁、野山にまじりて竹を取りつつ、よろづのことに使ひけり。（『竹取物語』）",
+          question: "傍線部「使ひ」の活用の種類と活用形として正しいものを選べ。",
+          choices: ["ハ行四段活用・連用形", "ハ行上二段活用・連用形", "ハ行下二段活用・未然形", "ワ行四段活用・終止形"],
+          answer: 0,
+          hint: "基本形「使ふ」の後ろに過去の助動詞「けり」が続いている点に注目しよう。",
+          explanation: "「使ふ」はハ行四段活用の動詞で、「けり」に続く連用形です。",
+          ruidai: {
+            passage: "心に思ふことを、見るもの聞くものにつけて言ひ出せるなり。（『古今和歌集』仮名序）",
+            question: "【類題】「思ふ」の活用の種類と活用形として正しいものを選べ。",
+            choices: ["ハ行四段活用・連体形", "ハ行下二段活用・終止形", "ハ行上一段活用・連体形", "ワ行四段活用・未然形"],
+            answer: 0,
+            hint: "「思ふ」はハ行四段活用。後ろの体言「こと」を修飾しているよ。",
+            explanation: "「思ふ」はハ行四段活用の連体形です。"
+          }
+        },
+        {
+          id: "G02", set: "A", unit: "古文（動詞・形容詞の活用）",
+          passage: "京には見えぬ鳥なれば、みな人見知らず。（『伊勢物語』）",
+          question: "「見え」の活用の種類と活用形として正しいものを選べ。",
+          choices: ["ヤ行下二段活用・未然形", "ヤ行上二段活用・連用形", "ア行下二段活用・未然形", "ワ行下二段活用・連用形"],
+          answer: 0,
+          hint: "元の形は「見ゆ」。「見えず・見えたり・見ゆ・見ゆる」と活用するよ。",
+          explanation: "「見ゆ」はヤ行下二段活用で、打消「ず」の連体形「ぬ」に続く未然形です。",
+          ruidai: {
+            passage: "月やあらぬ春や昔の春ならぬわが身ひとつはもとの身にして（『伊勢物語』）",
+            question: "【類題】次の動詞のうち、ヤ行下二段活用のものはどれか。",
+            choices: ["越ゆ", "起く", "蹴る", "死ぬ"],
+            answer: 0,
+            hint: "「越えず・越えたり・越ゆ・越ゆる」と活用する語を探そう。",
+            explanation: "「越ゆ」はヤ行下二段活用です。"
+          }
+        },
+        {
+          id: "G03", set: "A", unit: "古文（助動詞・敬語）",
+          passage: "むかし、男ありけり。その男、身をえうなきものに思ひなして、京にはあらじ、あづまの方に住むべき国求めにとて行きけり。（『伊勢物語』）",
+          question: "「あらじ」の助動詞「じ」の文法的意味として最も適切なものを選べ。",
+          choices: ["打消意志（〜まい・〜つもりはない）", "過去（〜た）", "完了（〜てしまった）", "断定（〜である）"],
+          answer: 0,
+          hint: "京を離れて東へ向かう男の決意を表す表現だよ。",
+          explanation: "「じ」は打消推量・打消意志を表し、ここでは打消意志です。",
+          ruidai: {
+            passage: "この世にはまた見じとぞ思ふ。（『竹取物語』）",
+            question: "【類題】「見じ」の助動詞「じ」の意味と活用形として正しいものを選べ。",
+            choices: ["打消意志・終止形", "打消推量・連体形", "過去・終止形", "受身・未然形"],
+            answer: 0,
+            hint: "「〜とぞ思ふ」の前に置かれる基本形（終止形）だよ。",
+            explanation: "「じ」は終止形で、打消意志を表します。"
+          }
+        },
+        {
+          id: "G04", set: "B", unit: "漢文（返り点・句法）",
+          passage: "未ダ生ヲ知ラズ、焉ンゾ死ヲ知ラン。（『論語』）",
+          question: "この文に含まれる2つの重要句法の組み合わせとして正しいものを選べ。",
+          choices: [
+            "再読文字「未（いまだ〜ず）」と反語「焉（いづくんぞ〜ん）」",
+            "使役「使（〜しむ）」と受身「被（〜らる）」",
+            "抑揚「況（いはんや〜をや）」と限定「唯（ただ〜のみ）」",
+            "仮定「則（すなはち）」と禁止「莫（なかれ）」"
+          ],
+          answer: 0,
+          hint: "「未」は2回読む漢字、「焉」は文末を「〜ん」で結ぶ反語の漢字だよ。",
+          explanation: "「未（いまだ〜ず）」は再読文字、「焉（いづくんぞ〜ん）」は反語です。",
+          ruidai: {
+            passage: "将ニ軍ヲ発セントス。",
+            question: "【類題】再読文字「将」の読み方と意味として正しいものを選べ。",
+            choices: [
+              "まさに〜んとす／今にも〜しようとしている",
+              "いまだ〜ず／まだ〜ない",
+              "なほ〜ごとし／まるで〜のようだ",
+              "すべからく〜べし／ぜひとも〜すべきだ"
+            ],
+            answer: 0,
+            hint: "1回目に「まさに」、2回目に「んとす」と読む再読文字だよ。",
+            explanation: "「将」は「まさに〜んとす」と読みます。"
+          }
+        },
+        {
+          id: "G05", set: "B", unit: "現代文（評論・小説読解語彙）",
+          passage: "近代科学は客観的な実証を重んじるあまり、数値化できない主観的な体験を「捨象」してきた側面がある。",
+          question: "「捨象（しゃしょう）」の意味として最も適切なものを選べ。",
+          choices: [
+            "ある側面を取り去り、他の特徴だけを抜き出して考えること",
+            "あらゆる要素をすべて残さず記録すること",
+            "抽象的な理論を具体的な例に置き換えること",
+            "相手の意見に無条件で賛成すること"
+          ],
+          answer: 0,
+          hint: "「捨」てるという漢字の意味に注目しよう。",
+          explanation: "「捨象」は考察対象からある要素を切り捨てて除外することです。",
+          ruidai: {
+            passage: "多様な個別の事例から共通する本質だけを「抽象」して概念化する。",
+            question: "【類題】評論文における「抽象」の意味として最も適切なものを選べ。",
+            choices: [
+              "多くの事例から共通する本質的特徴を抜き出して一般化すること",
+              "曖昧でわけのわからない話をすること",
+              "絵画や音楽だけを鑑賞すること",
+              "具体的な数字だけを並べること"
+            ],
+            answer: 0,
+            hint: "「具体」と対になる言葉で、共通の本質を取り出す思考操作だよ。",
+            explanation: "「抽象」は共通の本質的特徴を抜き出して一般化することです。"
+          }
+        },
+        {
+          id: "G06", set: "A", unit: "漢字・語彙・文学史",
+          passage: "",
+          question: "「杞憂（きゆう）」の意味として最も適切なものを選べ。",
+          choices: [
+            "無用な取り越し苦労のこと",
+            "決して実現しない夢のこと",
+            "第三者が利益を得ること",
+            "つじつまが合わないこと"
+          ],
+          answer: 0,
+          hint: "天が崩れ落ちてくるのではないかと心配した故事に由来するよ。",
+          explanation: "『列子』の故事に由来し、無用な取り越し苦労を意味します。",
+          ruidai: {
+            passage: "",
+            question: "【類題】「画竜点睛（がりょうてんせい）」の意味として最も適切なものを選べ。",
+            choices: [
+              "物事を完成させるための最後の重要な仕上げをすること",
+              "見た目は立派だが中身が伴っていないこと",
+              "最初から最後まで計画通りに進まないこと",
+              "優れた才能を持ちながら世間に認められないこと"
+            ],
+            answer: 0,
+            hint: "竜の絵に最後にひとみを描き入れた故事だよ。",
+            explanation: "「画竜点睛」は最後の重要な仕上げを意味します。"
+          }
+        }
+      ];
+
+      function createSubjectTemplate(tplKey, customName) {
+        if (tplKey === "english") {
+          return {
+            name: customName || "英語",
+            units: ["時制・完了形", "関係詞・分詞", "仮定法・助動詞"],
+            questions: [
+              {
+                id: "E01", set: "A", unit: "時制・完了形",
+                passage: "I (     ) this book since last Sunday.",
+                question: "空欄に入る最も適切な形を選べ。",
+                choices: ["have been reading", "am reading", "read", "will read"],
+                answer: 0,
+                hint: "「since last Sunday」という継続の表現に注目しよう。",
+                explanation: "過去の時点から現在まで継続する動作には現在完了進行形 have been reading が適します。",
+                ruidai: {
+                  passage: "She (     ) in Tokyo for five years.",
+                  question: "【類題】「彼女は5年間東京に住んでいる（今も住んでいる）」を表す最も適切な形を選べ。",
+                  choices: ["has lived", "lives", "is living", "was living"],
+                  answer: 0,
+                  hint: "「for five years」と現在まで続く期間を表すには完了形を使おう。",
+                  explanation: "継続を表す現在完了形 has lived が適切です。"
+                }
+              }
+            ]
+          };
+        }
+        if (tplKey === "math") {
+          return {
+            name: customName || "数学",
+            units: ["二次関数・方程式", "三角比・図形", "確率・数列"],
+            questions: [
+              {
+                id: "M01", set: "A", unit: "二次関数・方程式",
+                passage: "y = 2(x - 3)² + 1",
+                question: "この二次関数の頂点の座標として正しいものを選べ。",
+                choices: ["(3, 1)", "(-3, 1)", "(3, -1)", "(-3, -1)"],
+                answer: 0,
+                hint: "y = a(x - p)² + q の頂点は (p, q) だよ。",
+                explanation: "頂点は (3, 1) です。",
+                ruidai: {
+                  passage: "y = -x² + 4x - 1",
+                  question: "【類題】この二次関数を平方完成した式として正しいものを選べ。",
+                  choices: ["y = -(x - 2)² + 3", "y = -(x + 2)² + 3", "y = -(x - 2)² - 5", "y = (x - 2)² + 3"],
+                  answer: 0,
+                  hint: "-(x² - 4x) - 1 から -(x - 2)² を作ってみよう。",
+                  explanation: "y = -(x - 2)² + 3 となります。"
+                }
+              }
+            ]
+          };
+        }
+        if (tplKey === "science") {
+          return {
+            name: customName || "理科",
+            units: ["物理（力学）", "化学（物質量）", "生物（細胞）"],
+            questions: [
+              {
+                id: "S01", set: "A", unit: "物理（力学）",
+                passage: "質量 m [kg]、力 F [N]、加速度 a [m/s²]",
+                question: "運動方程式として正しいものを選べ。",
+                choices: ["ma = F", "F = ma²", "m = Fa", "a = mF"],
+                answer: 0,
+                hint: "質量 × 加速度 ＝ 力 という関係式だよ。",
+                explanation: "運動方程式は ma = F です。",
+                ruidai: {
+                  passage: "ばね定数 k [N/m]、のび x [m]、弾性力 f [N]",
+                  question: "【類題】フックの法則を表す式として正しいものを選べ。",
+                  choices: ["f = kx", "f = k / x", "f = kx²", "f = k + x"],
+                  answer: 0,
+                  hint: "のびに比例して弾性力が大きくなるよ。",
+                  explanation: "フックの法則は f = kx です。"
+                }
+              }
+            ]
+          };
+        }
+        if (tplKey === "social") {
+          return {
+            name: customName || "社会",
+            units: ["歴史", "地理", "公民"],
+            questions: [
+              {
+                id: "H01", set: "A", unit: "歴史",
+                passage: "1889年（明治22年）発布",
+                question: "アジアで最初の立憲君主制の憲法とされるものはどれか。",
+                choices: ["大日本帝国憲法", "日本国憲法", "五箇条の御誓文", "十七条憲法"],
+                answer: 0,
+                hint: "明治時代に公布された憲法だよ。",
+                explanation: "1889年に大日本帝国憲法が発布されました。",
+                ruidai: {
+                  passage: "1946年公布・1947年施行",
+                  question: "【類題】国民主権・基本的人権の尊重・平和主義を三大原理とする憲法はどれか。",
+                  choices: ["日本国憲法", "大日本帝国憲法", "明治憲法草案", "ポツダム宣言"],
+                  answer: 0,
+                  hint: "現在の日本の最高法規だよ。",
+                  explanation: "日本国憲法は1947年5月3日に施行されました。"
+                }
+              }
+            ]
+          };
+        }
+        return {
+          name: customName || "新規科目",
+          units: ["単元1", "単元2"],
+          questions: [
+            {
+              id: "C_INIT_01", set: "A", unit: "単元1",
+              passage: "テスト範囲の言葉を入力して、その場で問題を自動生成できます。",
+              question: "サンプル問題：テスト範囲の文章から問題を自動生成すると、類題も作られますか？",
+              choices: ["はい、類題とヒントも自動作成される", "いいえ、問題文だけ作られる", "毎回手動で作り直す必要がある", "1問しか作れない"],
+              answer: 0,
+              hint: "自動生成ボタンを押したあとの説明を見てみよう。",
+              explanation: "範囲の言葉や文面から、選択肢・ヒント・解説・類題をまとめて生成します。",
+              ruidai: {
+                passage: "【類題】単元のON/OFF機能",
+                question: "【類題】出題したくない単元があるとき、どう切り替えますか？",
+                choices: ["単元ごとのON/OFFスイッチをOFFにする", "科目自体を削除する", "履歴をすべて消す", "切り替えられない"],
+                answer: 0,
+                hint: "出題単元欄のスイッチをタップしてみよう。",
+                explanation: "単元ごとのON/OFFスイッチで出題対象を自由に調整できます。"
+              }
+            }
+          ]
+        };
+      }
+
+      function normalizeQ(q) {
+        const hint = q.hint || `「${q.unit}」の要点と選択肢の違いを確認しよう。`;
+        const ruidai = q.ruidai || {
+          passage: q.passage || "",
+          question: `【類題】${q.question}`,
+          choices: [...q.choices],
+          answer: q.answer,
+          hint,
+          explanation: q.explanation || "基礎事項を復習しましょう。"
+        };
+        return {
+          ...q,
+          hint,
+          ruidai: {
+            passage: ruidai.passage || "",
+            question: ruidai.question,
+            choices: ruidai.choices,
+            answer: ruidai.answer,
+            hint: ruidai.hint || hint,
+            explanation: ruidai.explanation || q.explanation || ""
+          }
+        };
+      }
+
+      function defaultStore() {
+        return {
+          currentId: "gengo",
+          subjects: {
+            gengo: {
+              name: "言語文化",
+              units: [...GENGO_UNITS],
+              questions: GENGO_QUESTIONS.map(normalizeQ),
+              mistakeIds: [],
+              hintIds: [],
+              scopeMemo: "言語文化 テスト範囲｜古文活用・助動詞・敬語、漢文再読文字・句法、現代文語彙、漢字・語彙",
+              scopeImages: []
+            }
+          }
+        };
+      }
+
+      function loadStore() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return defaultStore();
+          const parsed = JSON.parse(raw);
+          if (!parsed || !parsed.subjects || !parsed.currentId) return defaultStore();
+          Object.keys(parsed.subjects).forEach(k => {
+            const s = parsed.subjects[k];
+            s.questions = (s.questions || []).map(normalizeQ);
+            s.mistakeIds = Array.isArray(s.mistakeIds) ? s.mistakeIds : [];
+            s.hintIds = Array.isArray(s.hintIds) ? s.hintIds : [];
+            s.scopeMemo = typeof s.scopeMemo === "string" ? s.scopeMemo : "";
+            s.scopeImages = Array.isArray(s.scopeImages) ? s.scopeImages : [];
+          });
+          if (!parsed.subjects[parsed.currentId]) {
+            parsed.currentId = Object.keys(parsed.subjects)[0];
+          }
+          return parsed;
+        } catch (_) {
+          return defaultStore();
+        }
+      }
+
+      let db = loadStore();
+
+      function saveDb() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        } catch (_) {
+          showToast("保存容量の上限に近づきました。JSON保存をご利用ください。");
+        }
+      }
+
+      function curSub() {
+        return db.subjects[db.currentId];
+      }
+
+      const state = {
+        adminUnlocked: false,
+        set: "ALL",
+        activeUnits: [],
+        shuffleQ: true,
+        shuffleC: true,
+        qCount: "10",
+        qMode: "instant",
+        ruidaiScope: "ALL_TARGET",
+
+        isRuidai: false,
+        items: [],
+        idx: 0,
+        answers: {},
+        checked: {},
+        hintsShown: {}
+      };
+
+      function toast(msg) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => el.classList.remove("show"), 2600);
+      }
+
+      function showView(name) {
+        ["home", "quiz", "result"].forEach(v => {
+          document.getElementById("view-" + v).classList.toggle("hidden", v !== name);
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function refreshAdminLockUI() {
+        const btn = document.getElementById("btn-toggle-lock");
+        const banner = document.getElementById("lock-status-banner");
+        const bannerText = document.getElementById("lock-banner-text");
+        const bannerUnlockBtn = document.getElementById("btn-banner-unlock");
+
+        if (state.adminUnlocked) {
+          btn.textContent = "🔓 管理者解除中（ロックする）";
+          btn.classList.remove("locked");
+          bannerText.textContent = "🔓 管理者モード解除中：問題の自動生成・追加、範囲編集、履歴リセットが可能です。";
+          bannerUnlockBtn.textContent = "再ロック";
+          bannerUnlockBtn.className = "btn btn-outline btn-sm";
+        } else {
+          btn.textContent = "🔒 管理者ロック中";
+          btn.classList.add("locked");
+          bannerText.textContent = "🔒 現在「管理者ロック中」です。問題生成・追加・範囲編集・履歴リセットを行うには解除してください（初期パスコード：1234）。";
+          bannerUnlockBtn.textContent = "パスコード解除";
+          bannerUnlockBtn.className = "btn btn-hint btn-sm";
+        }
+
+        document.querySelectorAll(".admin-only-block").forEach(el => {
+          el.classList.toggle("hidden", !state.adminUnlocked);
+        });
+        document.querySelectorAll(".admin-only-btn").forEach(el => {
+          el.disabled = !state.adminUnlocked;
+        });
+      }
+
+      function openPasscodeModal() {
+        document.getElementById("passcode-error").textContent = "";
+        document.getElementById("input-passcode").value = "";
+        document.getElementById("passcode-modal").classList.remove("hidden");
+        setTimeout(() => document.getElementById("input-passcode").focus(), 40);
+      }
+
+      function handleLockButton() {
+        if (state.adminUnlocked) {
+          state.adminUnlocked = false;
+          refreshAdminLockUI();
+          toast("管理者ロックを有効にしました");
+        } else {
+          openPasscodeModal();
+        }
+      }
+
+      function shuffleArr(arr) {
+        const copy = [...arr];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function getTargetIds(sub, scope) {
+        const m = sub.mistakeIds || [];
+        const h = sub.hintIds || [];
+        if (scope === "MISTAKE_ONLY") return Array.from(new Set(m));
+        if (scope === "HINT_ONLY") return Array.from(new Set(h));
+        return Array.from(new Set([...m, ...h]));
+      }
+
+      function getFilteredPool() {
+        const sub = curSub();
+        return sub.questions.filter(q => {
+          const okSet = state.set === "ALL" || q.set === state.set;
+          const okUnit = state.activeUnits.includes(q.unit);
+          return okSet && okUnit;
+        });
+      }
+
+      // テスト範囲の言葉・詳細からその場で問題を自動生成する
+      function generateQuestionsFromText(rawText, unitName, count) {
+        const cleaned = rawText.replace(/\s+/g, " ").trim();
+        const clauses = rawText
+          .split(/[。．\n、・／｜|]/)
+          .map(s => s.replace(/^[■●◆▶・\-\s]+/, "").trim())
+          .filter(s => s.length >= 2);
+
+        const baseClauses = clauses.length > 0 ? clauses : [cleaned || `${unitName}の基本事項`];
+        const generated = [];
+
+        for (let i = 0; i < count; i++) {
+          const clause = baseClauses[i % baseClauses.length];
+          const otherClauses = baseClauses.filter((_, idx) => idx !== (i % baseClauses.length));
+          const distractors = [];
+
+          for (let d = 0; d < 3; d++) {
+            if (otherClauses[d]) {
+              distractors.push(otherClauses[d].slice(0, 28));
+            } else {
+              const fallback = [
+                `${unitName}の別パターンの表現`,
+                `文脈や条件が異なるケース`,
+                `定義・意味を取り違えた記述`
+              ];
+              distractors.push(fallback[d]);
+            }
+          }
+
+          const shortKey = clause.length > 26 ? clause.slice(0, 26) + "…" : clause;
+          const isBlankType = i % 2 === 0;
+
+          const questionText = isBlankType
+            ? `【範囲演習】「${unitName}」の範囲「${shortKey}」に関する記述・ポイントとして最も適切なものを選べ。`
+            : `【要点確認】テスト範囲の「${shortKey}」を踏まえたとき、正しい組み合わせ・説明はどれか。`;
+
+          const ruidaiQuestion = isBlankType
+            ? `【類題】「${unitName}」の「${shortKey}」を別の視点で確認したとき、最も適切なものを選べ。`
+            : `【類題】テスト範囲「${shortKey}」の応用確認として正しいものを選べ。`;
+
+          generated.push(normalizeQ({
+            id: `GEN_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 5)}`,
+            set: i % 2 === 0 ? "A" : "B",
+            unit: unitName,
+            passage: cleaned ? `テスト範囲メモ：${cleaned.slice(0, 120)}${cleaned.length > 120 ? "…" : ""}` : "",
+            question: questionText,
+            choices: [shortKey, distractors[0], distractors[1], distractors[2]],
+            answer: 0,
+            hint: `範囲メモの「${shortKey}」の核となる意味や働きを思い出そう。`,
+            explanation: `テスト範囲「${clause}」に基づく問題です。教科書・ノートで「${shortKey}」の前後関係を確認しましょう。`,
+            ruidai: {
+              passage: cleaned ? `【類題範囲】${cleaned.slice(0, 100)}` : "",
+              question: ruidaiQuestion,
+              choices: [shortKey, distractors[1], distractors[2], `${unitName}の例外事項`],
+              answer: 0,
+              hint: `類題でも「${shortKey}」の要点がカギになるよ。`,
+              explanation: `【類題解説】「${clause}」のポイントを押さえておけば確実に解けます。`
+            }
+          }));
+        }
+
+        return generated;
+      }
+
+      function syncSubject() {
+        const sub = curSub();
+        document.getElementById("hdr-subject-name").textContent = sub.name;
+        state.set = "ALL";
+        state.activeUnits = [...sub.units];
+        document.getElementById("scope-memo").value = sub.scopeMemo || "";
+        renderSubjects();
+        renderSets();
+        renderUnits();
+        renderImages();
+        refreshRuidaiBanner();
+        refreshPoolInfo();
+        refreshAdminLockUI();
+      }
+
+      function renderSubjects() {
+        const box = document.getElementById("subject-list");
+        box.innerHTML = "";
+        Object.keys(db.subjects).forEach(id => {
+          const s = db.subjects[id];
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "subject-chip" + (id === db.currentId ? " active" : "");
+          btn.textContent = `${s.name}（${s.questions.length}問）`;
+          btn.addEventListener("click", () => {
+            db.currentId = id;
+            saveDb();
+            syncSubject();
+            toast(`「${s.name}」に切り替えました`);
+          });
+          box.appendChild(btn);
+        });
+      }
+
+      function renderSets() {
+        const sub = curSub();
+        const cntA = sub.questions.filter(q => q.set === "A").length;
+        const cntB = sub.questions.filter(q => q.set === "B").length;
+        const cntAll = sub.questions.length;
+
+        const defs = [
+          { key: "ALL", title: `全問ミックス（全${cntAll}問）`, desc: "基本・応用・生成問題をまとめて出題" },
+          { key: "A", title: `セットA（基本・標準 ${cntA}問）`, desc: "重要基礎・頻出パターンの確認" },
+          { key: "B", title: `セットB（応用・発展 ${cntB}問）`, desc: "識別・読解・発展問題の実戦練習" }
+        ];
+
+        const grid = document.getElementById("set-grid");
+        grid.innerHTML = "";
+        defs.forEach(d => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "set-btn" + (state.set === d.key ? " active" : "");
+          btn.innerHTML = `<span class="set-btn-title">${d.title}</span><span class="set-btn-desc">${d.desc}</span>`;
+          btn.addEventListener("click", () => {
+            state.set = d.key;
+            renderSets();
+            renderUnits();
+            refreshPoolInfo();
+          });
+          grid.appendChild(btn);
+        });
+      }
+
+      function renderUnits() {
+        const sub = curSub();
+        const grid = document.getElementById("unit-grid");
+        grid.innerHTML = "";
+        sub.units.forEach(u => {
+          const isOn = state.activeUnits.includes(u);
+          const count = sub.questions.filter(q => (state.set === "ALL" || q.set === state.set) && q.unit === u).length;
+          const wrap = document.createElement("div");
+          wrap.className = "unit-card-switch " + (isOn ? "on" : "off");
+          wrap.innerHTML = `
+            <div style="flex:1;">
+              <span>${u}</span>
+              <span class="unit-state-label">${isOn ? "ON" : "OFF"}</span>
+              <div style="font-size:0.76rem; color:var(--muted); margin-top:2px;">${count}問</div>
+            </div>
+            <label class="switch" title="${u}の出題ON/OFF">
+              <input type="checkbox" ${isOn ? "checked" : ""} />
+              <span class="slider"></span>
+            </label>
+          `;
+          const inp = wrap.querySelector("input");
+          inp.addEventListener("change", () => {
+            if (inp.checked) {
+              if (!state.activeUnits.includes(u)) state.activeUnits.push(u);
+            } else {
+              state.activeUnits = state.activeUnits.filter(x => x !== u);
+            }
+            renderUnits();
+            refreshPoolInfo();
+          });
+          grid.appendChild(wrap);
+        });
+      }
+
+      function refreshRuidaiBanner() {
+        const sub = curSub();
+        const mCnt = (sub.mistakeIds || []).length;
+        const hCnt = (sub.hintIds || []).length;
+        const tIds = getTargetIds(sub, state.ruidaiScope);
+
+        document.getElementById("ruidai-count").textContent = tIds.length;
+        document.getElementById("ruidai-summary").innerHTML =
+          `「${sub.name}」の記録：間違えた問題 <strong>${mCnt}問</strong> ／ ヒント使用 <strong>${hCnt}問</strong>（現在の対象：<strong>${tIds.length}問</strong>）`;
+
+        document.getElementById("btn-start-ruidai").disabled = tIds.length === 0;
+        document.getElementById("btn-reset-history").disabled = !state.adminUnlocked || (mCnt === 0 && hCnt === 0);
+
+        document.querySelectorAll("#ruidai-scope-pills .mini-pill").forEach(p => {
+          p.classList.toggle("active", p.dataset.scope === state.ruidaiScope);
+        });
+      }
+
+      function refreshPoolInfo() {
+        const pool = getFilteredPool();
+        const info = document.getElementById("pool-info");
+        const startBtn = document.getElementById("btn-start-quiz");
+        if (pool.length === 0) {
+          info.textContent = "※ ONになっている単元が0件です。単元のスイッチをONにしてください。";
+          info.style.color = "var(--danger)";
+          startBtn.disabled = true;
+          return;
+        }
+        const n = state.qCount === "ALL" ? pool.length : Math.min(Number(state.qCount), pool.length);
+        info.style.color = "var(--muted)";
+        info.textContent = `出題対象：${pool.length}問 中 ${n}問を出題（ONの単元：${state.activeUnits.length}個）`;
+        startBtn.disabled = false;
+      }
+
+      function renderImages() {
+        const sub = curSub();
+        const imgs = sub.scopeImages || [];
+        document.getElementById("img-count-label").textContent = `${imgs.length}枚`;
+        const grid = document.getElementById("image-grid");
+        grid.innerHTML = "";
+
+        imgs.forEach((im, i) => {
+          const card = document.createElement("div");
+          card.className = "img-card";
+          card.innerHTML = `
+            <div class="img-preview-box" title="タップで拡大">
+              <img src="${im.dataUrl}" alt="${im.caption || "範囲画像"}" />
+            </div>
+            <div class="img-card-body">
+              <input type="text" class="input" style="padding:8px 10px; font-size:0.82rem; min-height:38px;" value="${im.caption || ""}" placeholder="範囲メモ・ページ数" ${state.adminUnlocked ? "" : "disabled"} />
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.75rem; color:var(--muted);">#${i + 1}</span>
+                <button type="button" class="btn btn-danger-ghost btn-sm" ${state.adminUnlocked ? "" : "disabled"}>削除</button>
+              </div>
+            </div>
+          `;
+          card.querySelector(".img-preview-box").addEventListener("click", () => {
+            document.getElementById("modal-img").src = im.dataUrl;
+            document.getElementById("modal-title").textContent = im.caption || `テスト範囲画像 #${i + 1}`;
+            document.getElementById("img-modal").classList.remove("hidden");
+          });
+          card.querySelector("input").addEventListener("change", e => {
+            if (!state.adminUnlocked) return;
+            im.caption = e.target.value;
+            saveDb();
+          });
+          card.querySelector("button").addEventListener("click", () => {
+            if (!state.adminUnlocked) return;
+            sub.scopeImages = sub.scopeImages.filter(x => x.id !== im.id);
+            saveDb();
+            renderImages();
+            toast("範囲画像を削除しました");
+          });
+          grid.appendChild(card);
+        });
+      }
+
+      function handleFiles(files) {
+        if (!state.adminUnlocked) {
+          openPasscodeModal();
+          return;
+        }
+        const sub = curSub();
+        const list = Array.from(files).filter(f => f.type && f.type.startsWith("image/"));
+        if (list.length === 0) return;
+
+        list.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            if (!ev.target || !ev.target.result) return;
+            sub.scopeImages.push({
+              id: "img_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+              dataUrl: ev.target.result,
+              caption: file.name || "貼り付け画像"
+            });
+            saveDb();
+            renderImages();
+            toast(`「${sub.name}」に範囲画像を追加しました`);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function buildItems(baseList, ruidaiMode) {
+        let arr = state.shuffleQ ? shuffleArr(baseList) : [...baseList];
+        if (!ruidaiMode && state.qCount !== "ALL") {
+          arr = arr.slice(0, Number(state.qCount));
+        }
+        return arr.map(q => {
+          const src = ruidaiMode ? q.ruidai : q;
+          const order = src.choices.map((_, idx) => idx);
+          return {
+            qid: q.id,
+            unit: q.unit,
+            passage: src.passage || "",
+            question: src.question,
+            choices: src.choices,
+            answer: src.answer,
+            hint: src.hint || q.hint,
+            explanation: src.explanation,
+            choiceOrder: state.shuffleC ? shuffleArr(order) : order
+          };
+        });
+      }
+
+      function startQuiz(ruidaiMode) {
+        const sub = curSub();
+        if (ruidaiMode) {
+          const tIds = getTargetIds(sub, state.ruidaiScope);
+          const targets = sub.questions.filter(q => tIds.includes(q.id));
+          if (targets.length === 0) {
+            toast("対象となる問題がありません");
+            return;
+          }
+          state.isRuidai = true;
+          state.items = buildItems(targets, true);
+        } else {
+          const pool = getFilteredPool();
+          if (pool.length === 0) {
+            toast("出題対象となる単元をONにしてください");
+            return;
+          }
+          state.isRuidai = false;
+          state.items = buildItems(pool, false);
+        }
+
+        state.idx = 0;
+        state.answers = {};
+        state.checked = {};
+        state.hintsShown = {};
+        showView("quiz");
+        renderQ();
+      }
+
+      function renderQ() {
+        const sub = curSub();
+        const total = state.items.length;
+        const idx = state.idx;
+        const item = state.items[idx];
+        if (!item) return;
+
+        document.getElementById("q-num-badge").textContent = `第${idx + 1}問 / ${total}問`;
+        document.getElementById("q-unit-badge").textContent = item.unit;
+        document.getElementById("q-ruidai-badge").classList.toggle("hidden", !state.isRuidai);
+
+        const usedHint = (sub.hintIds || []).includes(item.qid) || !!state.hintsShown[idx];
+        const wasMistake = (sub.mistakeIds || []).includes(item.qid);
+        document.getElementById("q-hint-badge").classList.toggle("hidden", !usedHint);
+        document.getElementById("q-mistake-badge").classList.toggle("hidden", !wasMistake);
+
+        const isInstant = state.isRuidai || state.qMode === "instant";
+        document.getElementById("q-mode-text").textContent = isInstant ? "一問一答（即時判定）" : "テスト本番（一括採点）";
+        document.getElementById("q-progress").style.width = `${Math.round(((idx + 1) / total) * 100)}%`;
+
+        const jump = document.getElementById("jump-nav");
+        if (!isInstant) {
+          jump.classList.remove("hidden");
+          jump.innerHTML = "";
+          state.items.forEach((_, i) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "jump-btn" + (state.answers[i] !== undefined ? " done" : "") + (i === idx ? " now" : "");
+            b.textContent = i + 1;
+            b.addEventListener("click", () => { state.idx = i; renderQ(); });
+            jump.appendChild(b);
+          });
+        } else {
+          jump.classList.add("hidden");
+        }
+
+        const pEl = document.getElementById("q-passage");
+        if (item.passage) {
+          pEl.textContent = item.passage;
+          pEl.classList.remove("hidden");
+        } else {
+          pEl.classList.add("hidden");
+        }
+
+        const hBox = document.getElementById("q-hint-box");
+        if (state.hintsShown[idx]) {
+          hBox.innerHTML = `<strong>💡 ヒント：</strong>${item.hint}`;
+          hBox.classList.remove("hidden");
+        } else {
+          hBox.classList.add("hidden");
+        }
+
+        document.getElementById("q-text").textContent = item.question;
+
+        const cBox = document.getElementById("q-choices");
+        cBox.innerHTML = "";
+        const keys = ["ア", "イ", "ウ", "エ"];
+        const sel = state.answers[idx];
+        const done = isInstant && !!state.checked[idx];
+
+        item.choiceOrder.forEach((origIdx, vIdx) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "choice";
+          if (done) {
+            btn.disabled = true;
+            if (origIdx === item.answer) btn.classList.add("correct");
+            else if (origIdx === sel) btn.classList.add("wrong");
+          } else if (sel === origIdx) {
+            btn.classList.add("selected");
+          }
+          btn.innerHTML = `<span class="choice-key">${keys[vIdx] || (vIdx + 1)}</span><span style="flex:1;">${item.choices[origIdx]}</span>`;
+          btn.addEventListener("click", () => chooseAnswer(origIdx));
+          cBox.appendChild(btn);
+        });
+
+        const fb = document.getElementById("q-feedback");
+        if (done) {
+          const ok = sel === item.answer;
+          fb.classList.remove("hidden", "ok", "ng");
+          fb.classList.add(ok ? "ok" : "ng");
+          document.getElementById("fb-heading").textContent = ok ? "〇 正解！" : `✕ 不正解（正解：${item.choices[item.answer]}）`;
+          document.getElementById("fb-sub").textContent = state.isRuidai
+            ? (ok ? "★ 類題正解！対象履歴から解除しました" : "※ 復習対象に残っています")
+            : (ok ? "" : "※ 間違えた問題として記録しました");
+          document.getElementById("fb-exp").textContent = item.explanation;
+        } else {
+          fb.classList.add("hidden");
+        }
+
+        document.getElementById("btn-prev").disabled = idx === 0;
+        const nextBtn = document.getElementById("btn-next");
+        const gradeBtn = document.getElementById("btn-grade");
+        if (idx < total - 1) {
+          nextBtn.classList.remove("hidden");
+          gradeBtn.classList.add("hidden");
+        } else {
+          nextBtn.classList.add("hidden");
+          gradeBtn.classList.remove("hidden");
+          gradeBtn.textContent = isInstant
+            ? "採点結果を見る"
+            : `全問採点する（${Object.keys(state.answers).length}/${total}問済）`;
+        }
+      }
+
+      function chooseAnswer(origIdx) {
+        const sub = curSub();
+        const idx = state.idx;
+        const item = state.items[idx];
+        const isInstant = state.isRuidai || state.qMode === "instant";
+        if (isInstant && state.checked[idx]) return;
+
+        state.answers[idx] = origIdx;
+        if (isInstant) {
+          state.checked[idx] = true;
+          const ok = origIdx === item.answer;
+          if (state.isRuidai) {
+            if (ok) {
+              sub.mistakeIds = (sub.mistakeIds || []).filter(id => id !== item.qid);
+              sub.hintIds = (sub.hintIds || []).filter(id => id !== item.qid);
+            }
+          } else {
+            if (!ok && !(sub.mistakeIds || []).includes(item.qid)) {
+              sub.mistakeIds.push(item.qid);
+            }
+          }
+          saveDb();
+          refreshRuidaiBanner();
+        }
+        renderQ();
+      }
+
+      function gradeQuiz() {
+        const sub = curSub();
+        const total = state.items.length;
+        const isInstant = state.isRuidai || state.qMode === "instant";
+        if (!isInstant) {
+          const rem = total - Object.keys(state.answers).length;
+          if (rem > 0) {
+            toast(`未解答が ${rem}問 あります`);
+            return;
+          }
+        }
+
+        let correct = 0;
+        const unitMap = {};
+        sub.units.forEach(u => { unitMap[u] = { total: 0, correct: 0 }; });
+
+        state.items.forEach((item, i) => {
+          const ok = state.answers[i] === item.answer;
+          if (!unitMap[item.unit]) unitMap[item.unit] = { total: 0, correct: 0 };
+          unitMap[item.unit].total += 1;
+          if (ok) {
+            correct += 1;
+            unitMap[item.unit].correct += 1;
+            if (state.isRuidai) {
+              sub.mistakeIds = (sub.mistakeIds || []).filter(id => id !== item.qid);
+              sub.hintIds = (sub.hintIds || []).filter(id => id !== item.qid);
+            }
+          } else if (!state.isRuidai) {
+            if (!(sub.mistakeIds || []).includes(item.qid)) sub.mistakeIds.push(item.qid);
+          }
+        });
+
+        saveDb();
+        refreshRuidaiBanner();
+
+        const score = total > 0 ? Math.round((correct / total) * 100) : 0;
+        const rank = score >= 90 ? "S" : score >= 75 ? "A" : score >= 55 ? "B" : "C";
+
+        document.getElementById("res-title").textContent = state.isRuidai ? `${sub.name}：類題採点結果` : `${sub.name}：自動採点結果`;
+        document.getElementById("res-subtitle").textContent = state.isRuidai ? "弱点克服モード" : (state.set === "ALL" ? "全問ミックス" : "セット" + state.set);
+        document.getElementById("res-score").textContent = score;
+        document.getElementById("res-correct").textContent = correct;
+        document.getElementById("res-total").textContent = total;
+        document.getElementById("res-pct").textContent = score;
+
+        const rEl = document.getElementById("res-rank");
+        rEl.textContent = rank;
+        rEl.className = `rank-pill rank-${rank}`;
+
+        const tCnt = getTargetIds(sub, state.ruidaiScope).length;
+        document.getElementById("res-ruidai-cnt").textContent = tCnt;
+        document.getElementById("btn-res-ruidai").disabled = tCnt === 0;
+        document.getElementById("res-ruidai-note").textContent =
+          `「${sub.name}」の復習対象（誤答＋ヒント使用）：現在 ${getTargetIds(sub, "ALL_TARGET").length}問`;
+
+        const bars = document.getElementById("res-unit-bars");
+        bars.innerHTML = "";
+        Object.keys(unitMap).forEach(u => {
+          const st = unitMap[u];
+          if (!st || st.total === 0) return;
+          const pct = Math.round((st.correct / st.total) * 100);
+          const row = document.createElement("div");
+          row.className = "bar-row";
+          row.innerHTML = `
+            <div class="bar-head"><span>${u}</span><span>${st.correct}/${st.total}問（${pct}%）</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;"></div></div>
+          `;
+          bars.appendChild(row);
+        });
+
+        const rev = document.getElementById("res-review-list");
+        rev.innerHTML = "";
+        state.items.forEach((item, i) => {
+          const chosen = state.answers[i];
+          const ok = chosen === item.answer;
+          const usedHint = !!state.hintsShown[i] || (sub.hintIds || []).includes(item.qid);
+          const card = document.createElement("div");
+          card.className = "review-card " + (ok ? "ok" : "ng");
+          card.innerHTML = `
+            <div class="review-top">
+              <div class="badges">
+                <span class="badge badge-num">第${i + 1}問</span>
+                <span class="badge badge-unit">${item.unit}</span>
+                ${usedHint ? '<span class="badge badge-hint">💡 ヒント使用</span>' : ""}
+              </div>
+              <strong style="font-size:0.86rem; color:${ok ? "var(--success)" : "var(--danger)"};">${ok ? "〇 正解" : "✕ 不正解"}</strong>
+            </div>
+            <div style="font-weight:800; margin-bottom:6px;">${item.question}</div>
+            <div style="font-size:0.86rem;">あなたの解答：<strong>${chosen !== undefined ? item.choices[chosen] : "未解答"}</strong> ／ 正解：<strong>${item.choices[item.answer]}</strong></div>
+            <div class="review-exp"><strong>【解説】</strong>${item.explanation}</div>
+          `;
+          rev.appendChild(card);
+        });
+
+        showView("result");
+      }
+
+      function bindEvents() {
+        document.getElementById("btn-go-home").addEventListener("click", () => { syncSubject(); showView("home"); });
+        document.getElementById("btn-toggle-lock").addEventListener("click", handleLockButton);
+        document.getElementById("btn-banner-unlock").addEventListener("click", handleLockButton);
+
+        document.getElementById("btn-close-passcode").addEventListener("click", () => {
+          document.getElementById("passcode-modal").classList.add("hidden");
+        });
+
+        document.getElementById("btn-submit-passcode").addEventListener("click", () => {
+          const val = document.getElementById("input-passcode").value;
+          if (val === ADMIN_PASSCODE) {
+            state.adminUnlocked = true;
+            document.getElementById("passcode-modal").classList.add("hidden");
+            refreshAdminLockUI();
+            renderImages();
