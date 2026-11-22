@@ -1,0 +1,3813 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>テスト対策 Ver.5.2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap');
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background-color: #f4f6f9;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .app-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px -12px rgba(15, 23, 42, 0.12);
+    }
+
+    .navy-btn {
+      background: #162b49;
+      color: #ffffff;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .navy-btn:hover:not(:disabled) {
+      background: #1e3a5f;
+    }
+    .navy-btn:active:not(:disabled) {
+      transform: scale(0.99);
+    }
+    .navy-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .amber-btn {
+      background: #b97724;
+      color: #ffffff;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .amber-btn:hover:not(:disabled) {
+      background: #9e6319;
+    }
+    .amber-btn:active:not(:disabled) {
+      transform: scale(0.99);
+    }
+    .amber-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .sub-pill {
+      border-radius: 0.75rem;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .sub-pill:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+    .sub-pill-active {
+      background: #162b49;
+      color: #ffffff;
+      border-color: #162b49;
+    }
+
+    .choice-btn {
+      width: 100%;
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border-radius: 0.75rem;
+      border: 1.5px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .choice-btn:hover:not(:disabled) {
+      border-color: #162b49;
+      background: #f8fafc;
+    }
+    .choice-btn:disabled {
+      cursor: default;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- ヘッダーバー -->
+  <header class="bg-[#0f172a] text-white border-b border-slate-800 sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <button id="btnBrandHome" type="button" class="text-left font-extrabold tracking-tight text-base sm:text-lg text-white hover:text-amber-300 transition">
+          テスト対策
+        </button>
+        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-200 border border-amber-400/30">
+          Ver.5.2
+        </span>
+        <!-- ログイン後に表示される教科切替バー -->
+        <nav id="headerSubjectBar" class="hidden flex-wrap items-center gap-1.5 ml-1" aria-label="教科選択"></nav>
+      </div>
+
+      <!-- 右側ユーザー操作・管理/名前変更・意見要望・ログアウト -->
+      <div id="headerUserControls" class="hidden flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
+        <span id="headerSyncBadge" class="px-2 py-1 rounded-lg bg-slate-900 text-emerald-300 font-bold border border-slate-700">ローカル保存</span>
+        <span id="headerUserBadge" class="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-200 font-bold border border-slate-700"></span>
+        <button id="btnOpenFeedback" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-200 font-bold border border-slate-700 transition">
+          📮 意見・要望
+        </button>
+        <button id="btnOpenNameModal" type="button" class="hidden px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold border border-slate-700 transition">
+          名前変更
+        </button>
+        <button id="btnOpenAdminModal" type="button" class="hidden px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-extrabold transition">
+          管理者ページ
+        </button>
+        <button id="btnLogout" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-red-900/70 text-slate-300 hover:text-white font-bold border border-slate-700 transition">
+          ログアウト
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 共通メッセージ通知バナー -->
+  <div id="globalToast" class="hidden max-w-4xl w-full mx-auto px-4 pt-3 z-20">
+    <div id="globalToastInner" class="rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold border flex items-center justify-between gap-3 shadow-sm">
+      <span id="globalToastText"></span>
+      <button id="btnDismissToast" type="button" class="text-xs opacity-75 hover:opacity-100 font-extrabold">閉じる</button>
+    </div>
+  </div>
+
+  <!-- メインコンテナ -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-5 space-y-5">
+
+    <!-- 1. ログイン / 新規作成 エントリー画面 -->
+    <section id="entryScreen" class="max-w-md mx-auto pt-4 sm:pt-8">
+      <div class="app-card p-5 sm:p-6">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-5">
+          <div>
+            <h1 class="text-lg sm:text-xl font-black text-slate-900">テスト対策</h1>
+            <p class="text-xs text-slate-500 mt-0.5">ログインまたは新規作成を選んでください</p>
+          </div>
+          <span class="text-xs font-bold text-slate-400">Ver.5.2</span>
+        </div>
+
+        <!-- ログイン / 新規作成 タブ -->
+        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl mb-5">
+          <button id="tabAuthLogin" type="button" class="py-2 rounded-lg text-xs sm:text-sm font-extrabold bg-[#162b49] text-white transition">
+            ログイン
+          </button>
+          <button id="tabAuthSignup" type="button" class="py-2 rounded-lg text-xs sm:text-sm font-extrabold text-slate-600 hover:text-slate-900 transition">
+            新規作成
+          </button>
+        </div>
+
+        <!-- ログインフォーム -->
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label for="loginNameInput" class="block text-xs font-bold text-slate-700 mb-1">アカウント名</label>
+            <input id="loginNameInput" type="text" required autocomplete="username" placeholder="アカウント名を入力"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#162b49]" />
+          </div>
+          <div>
+            <label for="loginPinInput" class="block text-xs font-bold text-slate-700 mb-1">パスワード（4桁の数字）</label>
+            <input id="loginPinInput" type="password" inputmode="numeric" maxlength="4" required autocomplete="current-password" placeholder="4桁の数字"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm tracking-widest focus:outline-none focus:border-[#162b49]" />
+          </div>
+          <p id="loginErrorMsg" class="text-xs font-bold text-red-600 min-h-[1.1rem]"></p>
+          <button id="btnSubmitLogin" type="submit" class="w-full navy-btn py-2.5 text-sm">
+            ログイン
+          </button>
+        </form>
+
+        <!-- 新規作成フォーム -->
+        <form id="signupForm" class="hidden space-y-4">
+          <div>
+            <label for="signupNameInput" class="block text-xs font-bold text-slate-700 mb-1">アカウント名</label>
+            <input id="signupNameInput" type="text" required maxlength="20" placeholder="希望するアカウント名"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-[#162b49]" />
+          </div>
+          <div>
+            <label for="signupPinInput" class="block text-xs font-bold text-slate-700 mb-1">パスワード（4桁の数字・作成時のみ設定可能）</label>
+            <input id="signupPinInput" type="password" inputmode="numeric" maxlength="4" required placeholder="半角数字4桁"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm tracking-widest focus:outline-none focus:border-[#162b49]" />
+          </div>
+          <div>
+            <label for="signupPinConfirmInput" class="block text-xs font-bold text-slate-700 mb-1">パスワード確認（4桁の数字）</label>
+            <input id="signupPinConfirmInput" type="password" inputmode="numeric" maxlength="4" required placeholder="もう一度4桁の数字を入力"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm tracking-widest focus:outline-none focus:border-[#162b49]" />
+          </div>
+          <p id="signupErrorMsg" class="text-xs font-bold text-red-600 min-h-[1.1rem]"></p>
+          <button id="btnSubmitSignup" type="submit" class="w-full amber-btn py-2.5 text-sm">
+            新規アカウント作成
+          </button>
+        </form>
+
+        <!-- 削除アカウントの復旧依頼（ログインページから送信・削除後1日以内が復旧対象） -->
+        <div class="border-t border-slate-200 mt-5 pt-4 space-y-2.5">
+          <button id="btnToggleRecoveryBox" type="button" class="w-full text-left text-xs font-extrabold text-slate-700 hover:text-[#162b49] flex items-center justify-between">
+            <span>削除アカウントの復旧依頼（削除後24時間以内）</span>
+            <span id="recoveryToggleIcon">＋</span>
+          </button>
+          <div id="recoveryRequestPanel" class="hidden space-y-2.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              誤って削除したアカウントは削除から1日（24時間）以内であれば管理者が復旧できます。アカウント名とメモを入力して復旧を依頼してください。
+            </p>
+            <input id="recoveryAccountNameInput" type="text" placeholder="削除されたアカウント名"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs" />
+            <input id="recoveryNoteInput" type="text" placeholder="復旧依頼メモ（任意）"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs" />
+            <button id="btnSubmitRecoveryRequest" type="button" class="w-full navy-btn py-2 text-xs">
+              復旧依頼を送信する
+            </button>
+            <p id="recoveryStatusMessage" class="text-[11px] font-bold text-slate-700 min-h-[1rem]"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 学習ホーム＆教科選択画面 -->
+    <section id="studyHomeScreen" class="hidden space-y-5">
+      <!-- テスト範囲お知らせ＆共有問題パック -->
+      <div id="testScopeBannerCard" class="app-card p-4 sm:p-5 border-l-4 border-l-[#162b49]">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <h2 class="text-sm sm:text-base font-extrabold text-slate-900">テスト範囲のお知らせ・共有問題</h2>
+          <span id="testScopeCountBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700"></span>
+        </div>
+        <div id="testScopeNoticesList" class="space-y-2 text-xs sm:text-sm text-slate-700 mb-3"></div>
+        <div id="sharedPacksContainer" class="space-y-2"></div>
+      </div>
+
+      <!-- 教科選択カード -->
+      <div class="app-card p-5 sm:p-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-900">教科を選ぶ</h2>
+            <p class="text-xs sm:text-sm text-slate-500">高校1年向け5教科（各50問）・4択コースと記述・文章題コースに対応</p>
+          </div>
+          <!-- 一般ユーザー向けの申請・アカウント削除ボタン群（管理者アカウントでは非表示） -->
+          <div id="userAccountActionButtons" class="flex flex-wrap items-center gap-2">
+            <button id="btnOpenPwRequestModal" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-300 bg-white hover:bg-slate-50 text-slate-700">
+              パスワード変更依頼
+            </button>
+            <button id="btnOpenNameQuotaModal" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-300 bg-white hover:bg-slate-50 text-slate-700">
+              名前変更回数申請
+            </button>
+            <button id="btnOpenSelfDeleteModal" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-red-300 bg-red-50 hover:bg-red-100 text-red-800">
+              アカウント削除
+            </button>
+          </div>
+        </div>
+
+        <div id="homeSubjectGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- 3. 教科ワークスペース -->
+    <section id="subjectWorkspace" class="hidden space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <button id="btnBackToHome" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white border border-slate-300 hover:bg-slate-50 text-slate-700">
+            ← 教科選択へ戻る
+          </button>
+          <h2 id="activeSubjectTitle" class="text-xl font-black text-slate-900"></h2>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-bold">
+          <span class="px-3 py-1 rounded-full bg-slate-200 text-slate-800">
+            現在難易度: <span id="currentDiffLabel">Lv.2</span>
+          </span>
+          <span id="subjectPoolCountBadge" class="px-3 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200"></span>
+        </div>
+      </div>
+
+      <!-- 出題設定パネル -->
+      <div id="quizSetupCard" class="app-card p-5 space-y-4">
+        <h3 class="text-sm sm:text-base font-extrabold text-slate-900 border-b border-slate-100 pb-2">出題設定</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- コース選択 -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">出題コース</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btnCourseChoice" type="button" class="py-2 px-3 rounded-xl text-xs font-extrabold border bg-[#162b49] text-white border-[#162b49]">
+                4択コース
+              </button>
+              <button id="btnCourseDescriptive" type="button" class="py-2 px-3 rounded-xl text-xs font-extrabold border bg-white text-slate-700 border-slate-300">
+                記述・文章題コース
+              </button>
+            </div>
+          </div>
+
+          <!-- 問題数選択（5〜50問・5問刻み） -->
+          <div>
+            <label for="selectQuestionCount" class="block text-xs font-bold text-slate-700 mb-1.5">出題数（5〜50問・5問刻み）</label>
+            <select id="selectQuestionCount" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm font-bold bg-white">
+              <option value="5">5問</option>
+              <option value="10" selected>10問</option>
+              <option value="15">15問</option>
+              <option value="20">20問</option>
+              <option value="25">25問</option>
+              <option value="30">30問</option>
+              <option value="35">35問</option>
+              <option value="40">40問</option>
+              <option value="45">45問</option>
+              <option value="50">50問</option>
+            </select>
+          </div>
+
+          <!-- 単語⇔意味 出題方向切替 -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">単語⇔意味 出題方向</label>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button type="button" data-word-dir="both" class="word-dir-btn py-2 px-2 rounded-xl text-[11px] font-bold border bg-[#162b49] text-white border-[#162b49]">
+                両方ミックス
+              </button>
+              <button type="button" data-word-dir="to_meaning" class="word-dir-btn py-2 px-2 rounded-xl text-[11px] font-bold border bg-white text-slate-700 border-slate-300">
+                単語 → 意味
+              </button>
+              <button type="button" data-word-dir="to_word" class="word-dir-btn py-2 px-2 rounded-xl text-[11px] font-bold border bg-white text-slate-700 border-slate-300">
+                意味 → 単語
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 単元フィルタ -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold text-slate-700">出題する単元（ON/OFF）</span>
+            <div class="flex gap-2 text-[11px] font-bold">
+              <button id="btnAllUnitsOn" type="button" class="text-blue-700 hover:underline">すべてON</button>
+              <button id="btnAllUnitsOff" type="button" class="text-slate-600 hover:underline">すべてOFF</button>
+            </div>
+          </div>
+          <div id="unitFilterChips" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button id="btnStartQuiz" type="button" class="navy-btn px-5 py-2.5 text-xs sm:text-sm">
+            通常出題を開始
+          </button>
+          <button id="btnStartSimilarQuiz" type="button" class="amber-btn px-5 py-2.5 text-xs sm:text-sm">
+            間違えた問題の類題に挑戦
+          </button>
+        </div>
+      </div>
+
+      <!-- 演習画面 -->
+      <div id="quizPlayCard" class="hidden app-card p-5 sm:p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="playProgressText" class="text-xs sm:text-sm font-extrabold text-slate-900"></span>
+            <span id="playCourseBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700"></span>
+            <span id="playUnitBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200"></span>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-bold">
+            <span class="px-2.5 py-0.5 rounded-full bg-slate-900 text-white" id="playDiffBadge"></span>
+            <span class="text-slate-600" id="playScoreBadge"></span>
+          </div>
+        </div>
+
+        <div id="playQuestionPrompt" class="text-base sm:text-lg font-extrabold text-slate-900 leading-relaxed whitespace-pre-wrap"></div>
+
+        <!-- 4択エリア -->
+        <div id="choiceArea" class="space-y-2.5"></div>
+
+        <!-- 記述・文章題エリア -->
+        <div id="descriptiveArea" class="hidden space-y-3">
+          <textarea id="descriptiveAnswerInput" rows="3" placeholder="解答・キーワード・文章を入力してください"
+            class="w-full rounded-xl border border-slate-300 p-3 text-sm focus:outline-none focus:border-[#162b49]"></textarea>
+          <button id="btnSubmitDescriptive" type="button" class="navy-btn px-5 py-2 text-xs sm:text-sm">
+            この内容で解答する
+          </button>
+        </div>
+
+        <!-- ヒント＆フィードバックエリア -->
+        <div class="pt-2 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <button id="btnShowHint" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300">
+              段階ヒントを見る
+            </button>
+            <button id="btnQuitQuiz" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700">
+              出題設定へ戻る
+            </button>
+          </div>
+
+          <div id="hintBox" class="hidden rounded-xl bg-amber-50/80 border border-amber-200 p-3.5 text-xs sm:text-sm text-amber-950 whitespace-pre-wrap"></div>
+
+          <div id="answerFeedbackBox" class="hidden rounded-xl p-4 border text-xs sm:text-sm space-y-2">
+            <div id="feedbackResultHeader" class="font-extrabold text-sm sm:text-base"></div>
+            <div id="feedbackCorrectAnswer" class="font-bold text-slate-800"></div>
+            <div id="feedbackExplanation" class="text-slate-700 leading-relaxed whitespace-pre-wrap"></div>
+          </div>
+
+          <div class="flex justify-end">
+            <button id="btnNextQuestion" type="button" class="hidden navy-btn px-6 py-2.5 text-xs sm:text-sm">
+              次の問題へ →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- スコア結果＆全問解説画面 -->
+      <div id="quizResultCard" class="hidden app-card p-5 sm:p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <h3 class="text-lg sm:text-xl font-black text-slate-900">演習結果・スコア</h3>
+            <p id="resultSummaryMeta" class="text-xs sm:text-sm text-slate-600 mt-0.5"></p>
+          </div>
+          <div class="text-right">
+            <div id="resultScoreBig" class="text-2xl sm:text-3xl font-black text-[#162b49]"></div>
+            <div id="resultDiffTrajectory" class="text-xs font-bold text-slate-500 mt-0.5"></div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5">
+          <button id="btnRetrySameSet" type="button" class="navy-btn px-4 py-2 text-xs sm:text-sm">
+            もう一度挑戦する
+          </button>
+          <button id="btnResultSimilarQuiz" type="button" class="amber-btn px-4 py-2 text-xs sm:text-sm">
+            間違えた問題の類題を解く
+          </button>
+          <button id="btnBackToSetupFromResult" type="button" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-800">
+            設定に戻る
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-sm font-extrabold text-slate-900">全問題の振り返り・解説</h4>
+          <div id="resultReviewList" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- 省力化＆画像OCR問題追加パネル（個人保存領域へ永続化） -->
+      <div id="personalCreationCard" class="app-card p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">問題追加（1行追加・一括生成・画像OCR・自動量産）</h3>
+            <p class="text-xs text-slate-500">追加した問題はあなたのアカウント専用領域に保存され、バージョン更新後も消えません</p>
+          </div>
+          <button id="btnAutoGenerateBatch" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white">
+            +5問 自動生成
+          </button>
+        </div>
+
+        <!-- 1行クイック追加 -->
+        <form id="quickSingleForm" class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <input id="quickPairInput" type="text" placeholder="1行追加（例：photosynthesis : 光合成 / 細胞壁 : 植物細胞の外側を囲む構造）"
+            class="sm:col-span-7 rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-[#162b49]" />
+          <input id="quickUnitInput" type="text" placeholder="単元名（省略可）"
+            class="sm:col-span-3 rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-[#162b49]" />
+          <button type="submit" class="sm:col-span-2 navy-btn py-2 px-3 text-xs">
+            1行追加
+          </button>
+        </form>
+
+        <!-- メモ一括貼り付け生成 -->
+        <div class="space-y-2">
+          <label for="bulkMemoInput" class="block text-xs font-bold text-slate-700">メモ・単語リスト一括生成（1行1項目：`語句 : 意味` や `問題 : 答え` など）</label>
+          <textarea id="bulkMemoInput" rows="3" placeholder="例：&#10;mitosis : 体細胞分裂&#10;inflation : 物価が継続的に上昇すること&#10;二次関数の頂点 : 平方完成で求められる"
+            class="w-full rounded-xl border border-slate-300 p-3 text-xs sm:text-sm focus:outline-none focus:border-[#162b49]"></textarea>
+          <button id="btnBulkGenerate" type="button" class="amber-btn px-4 py-2 text-xs">
+            メモから一括生成（4択＋記述）
+          </button>
+        </div>
+
+        <!-- ノート・プリント画像OCR（Tesseract.js） -->
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3.5 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs font-extrabold text-slate-800">ノート・プリント画像OCR解析（Tesseract.js）</span>
+            <select id="ocrLangSelect" class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-bold">
+              <option value="jpn+eng">日本語 + 英語</option>
+              <option value="eng">英語のみ</option>
+              <option value="jpn">日本語のみ</option>
+            </select>
+          </div>
+          <input id="ocrImageInput" type="file" accept="image/*" multiple class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#162b49] file:text-white hover:file:bg-[#1e3a5f]" />
+          <div id="ocrProgressText" class="text-xs font-bold text-slate-600"></div>
+          <textarea id="ocrExtractedText" rows="3" placeholder="画像から読み取った文字がここに表示されます（手直しも可能）"
+            class="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs sm:text-sm"></textarea>
+          <button id="btnGenerateFromOcr" type="button" class="navy-btn px-4 py-2 text-xs">
+            OCRテキストから問題を自動生成
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- モーダル1：一般ユーザー名前変更（3回制限・ロック・理由付き追加申請・返信履歴） -->
+  <div id="nameChangeModal" class="hidden fixed inset-0 z-40 bg-slate-950/60 flex items-center justify-center p-4">
+    <div class="app-card max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="text-base font-black text-slate-900">アカウント名の変更</h3>
+        <button id="btnCloseNameModal" type="button" class="text-xs font-bold text-slate-500 hover:text-slate-900">閉じる</button>
+      </div>
+      <div id="nameQuotaStatusText" class="text-xs font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200"></div>
+
+      <form id="nameChangeForm" class="space-y-3">
+        <div>
+          <label for="newAccountNameInput" class="block text-xs font-bold text-slate-700 mb-1">新しいアカウント名</label>
+          <input id="newAccountNameInput" type="text" maxlength="20" placeholder="新しい名前を入力"
+            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+        </div>
+        <button id="btnExecuteNameChange" type="submit" class="w-full navy-btn py-2 text-xs sm:text-sm">
+          名前を変更する
+        </button>
+      </form>
+
+      <!-- 上限到達時の理由付き追加回数申請（理由が空なら送信ボタンロック） -->
+      <div id="nameQuotaRequestBox" class="hidden border-t border-slate-200 pt-3 space-y-2.5">
+        <p class="text-xs font-extrabold text-amber-900">名前変更の上限に達しています。追加回数を管理者に申請できます（理由必須）。</p>
+        <textarea id="nameQuotaReasonInput" rows="2" placeholder="追加が必要な理由を入力してください（空白では送信できません）"
+          class="w-full rounded-xl border border-slate-300 p-2.5 text-xs"></textarea>
+        <button id="btnSubmitNameQuotaRequest" type="button" disabled class="w-full amber-btn py-2 text-xs">
+          変更回数追加を申請する
+        </button>
+      </div>
+
+      <!-- 自分の名前変更回数申請・管理者返信一覧 -->
+      <div class="border-t border-slate-200 pt-3 space-y-2">
+        <h4 class="text-xs font-extrabold text-slate-800">あなたの回数申請・管理者返信</h4>
+        <div id="myNameQuotaHistoryList" class="space-y-2 text-xs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル2：パスワード変更依頼（現在のPW＋変更後の4桁PWを送信→管理者画面で現在PW照合後に変更＋返信履歴） -->
+  <div id="pwRequestModal" class="hidden fixed inset-0 z-40 bg-slate-950/60 flex items-center justify-center p-4">
+    <div class="app-card max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="text-base font-black text-slate-900">パスワード変更依頼</h3>
+        <button id="btnClosePwRequestModal" type="button" class="text-xs font-bold text-slate-500 hover:text-slate-900">閉じる</button>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        パスワードは作成時の1回のみ設定できます。変更したい場合は「現在のパスワード」と「変更後の4桁パスワード」を管理者へ送信してください。管理者が現在のパスワードを確認して一致した場合のみ変更されます。
+      </p>
+      <form id="pwRequestForm" class="space-y-3">
+        <div>
+          <label for="reqCurrentPinInput" class="block text-xs font-bold text-slate-700 mb-1">現在のパスワード（4桁数字）</label>
+          <input id="reqCurrentPinInput" type="password" inputmode="numeric" maxlength="4" required placeholder="現在の4桁数字"
+            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tracking-widest" />
+        </div>
+        <div>
+          <label for="reqNewPinInput" class="block text-xs font-bold text-slate-700 mb-1">変更後のパスワード（4桁数字）</label>
+          <input id="reqNewPinInput" type="password" inputmode="numeric" maxlength="4" required placeholder="新しい4桁数字"
+            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tracking-widest" />
+        </div>
+        <button type="submit" class="w-full navy-btn py-2 text-xs sm:text-sm">
+          管理者に変更を依頼する
+        </button>
+      </form>
+
+      <!-- 自分のパスワード変更依頼・管理者返信一覧 -->
+      <div class="border-t border-slate-200 pt-3 space-y-2">
+        <h4 class="text-xs font-extrabold text-slate-800">あなたの変更依頼・管理者返信</h4>
+        <div id="myPwRequestHistoryList" class="space-y-2 text-xs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル3：利用者から運営への意見・要望ページ（管理者返信表示あり） -->
+  <div id="feedbackModal" class="hidden fixed inset-0 z-40 bg-slate-950/60 flex items-center justify-center p-4">
+    <div class="app-card max-w-lg w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 id="feedbackModalTitle" class="text-base font-black text-slate-900">運営への意見・要望</h3>
+        <button id="btnCloseFeedbackModal" type="button" class="text-xs font-bold text-slate-500 hover:text-slate-900">閉じる</button>
+      </div>
+      <!-- 一般利用者向け投稿フォーム（管理者ログイン時は非表示にして管理者ページへ誘導） -->
+      <form id="feedbackForm" class="space-y-3">
+        <div>
+          <label for="feedbackCategorySelect" class="block text-xs font-bold text-slate-700 mb-1">種別</label>
+          <select id="feedbackCategorySelect" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs sm:text-sm bg-white">
+            <option value="問題追加リクエスト">問題追加リクエスト</option>
+            <option value="不具合・誤字報告">不具合・誤字報告</option>
+            <option value="機能改善の提案">機能改善の提案</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div>
+          <label for="feedbackBodyTextarea" class="block text-xs font-bold text-slate-700 mb-1">内容</label>
+          <textarea id="feedbackBodyTextarea" rows="3" required placeholder="運営に伝えたい意見や要望を入力してください"
+            class="w-full rounded-xl border border-slate-300 p-3 text-xs sm:text-sm"></textarea>
+        </div>
+        <button type="submit" class="w-full navy-btn py-2 text-xs sm:text-sm">
+          意見を送信する
+        </button>
+      </form>
+      <div id="adminFeedbackNoticeBox" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 font-bold">
+        管理者アカウントでは一般向けの意見送信フォームは表示されません。受信一覧と返信は「管理者ページ → 意見・要望受信箱」から行ってください。
+      </div>
+      <div class="border-t border-slate-200 pt-3">
+        <h4 class="text-xs font-extrabold text-slate-800 mb-2">あなたの送信履歴・管理者からの返信</h4>
+        <div id="myFeedbackHistoryList" class="space-y-2 text-xs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル5：一般ユーザー向けアカウント自己削除（現在の4桁PW一致で削除・削除後1日以内は管理者復旧可能） -->
+  <div id="selfDeleteModal" class="hidden fixed inset-0 z-40 bg-slate-950/60 flex items-center justify-center p-4">
+    <div class="app-card max-w-md w-full p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="text-base font-black text-red-900">アカウントの削除</h3>
+        <button id="btnCloseSelfDeleteModal" type="button" class="text-xs font-bold text-slate-500 hover:text-slate-900">閉じる</button>
+      </div>
+      <p class="text-xs text-slate-700 leading-relaxed">
+        アカウントを削除すると通常のログインができなくなります。削除から<strong>1日（24時間）以内</strong>であれば、ログイン画面から復旧依頼を出すことで管理者が復旧できます。実行するには現在の4桁パスワードを入力してください。
+      </p>
+      <form id="selfDeleteForm" class="space-y-3">
+        <div>
+          <label for="selfDeletePinInput" class="block text-xs font-bold text-slate-700 mb-1">現在のパスワード（4桁の数字）</label>
+          <input id="selfDeletePinInput" type="password" inputmode="numeric" maxlength="4" required placeholder="4桁の数字"
+            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm tracking-widest" />
+        </div>
+        <p id="selfDeleteErrorMsg" class="text-xs font-bold text-red-600 min-h-[1rem]"></p>
+        <button type="submit" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-red-600 hover:bg-red-700 text-white transition">
+          パスワードを確認してアカウントを削除する
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- モーダル4：管理者専用ページ -->
+  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 flex items-center justify-center p-3 sm:p-5">
+    <div class="app-card max-w-5xl w-full p-5 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+        <div>
+          <h3 class="text-lg sm:text-xl font-black text-slate-900">管理者専用コンソール</h3>
+          <p class="text-xs text-slate-500">アカウント管理・処罰・削除復旧（1日以内）・返信・テスト範囲共有・公式OCR・別端末同期</p>
+        </div>
+        <button id="btnCloseAdminModal" type="button" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 text-slate-800">
+          閉じる
+        </button>
+      </div>
+
+      <!-- 管理者タブ -->
+      <div class="flex flex-wrap gap-1.5 border-b border-slate-200 pb-3">
+        <button type="button" data-admin-tab="accounts" class="admin-tab-btn sub-pill sub-pill-active">アカウント・処罰・復旧</button>
+        <button type="button" data-admin-tab="requests" class="admin-tab-btn sub-pill">PW変更＆名前枠申請（返信）</button>
+        <button type="button" data-admin-tab="scope" class="admin-tab-btn sub-pill">テスト範囲＆共有問題</button>
+        <button type="button" data-admin-tab="ocr" class="admin-tab-btn sub-pill">公式問題OCR追加</button>
+        <button type="button" data-admin-tab="feedback" class="admin-tab-btn sub-pill">意見・要望受信箱（返信）</button>
+        <button type="button" data-admin-tab="sync" class="admin-tab-btn sub-pill">別デバイス連携・学習データ</button>
+      </div>
+
+      <!-- タブ1：アカウント一覧・削除復旧（1日以内）・活動ログ・処罰 -->
+      <div id="adminTab_accounts" class="admin-tab-panel space-y-5">
+        <div id="adminAccountOverview" class="text-xs font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200"></div>
+        <div id="adminAccountsList" class="space-y-3"></div>
+
+        <!-- 削除済みアカウント（削除後1日以内は復旧可能）＆ログインページからの復旧依頼 -->
+        <div class="border-t border-slate-200 pt-4 space-y-3">
+          <h4 class="text-xs sm:text-sm font-extrabold text-slate-900">ログインページからの復旧依頼一覧</h4>
+          <div id="adminRecoveryRequestsList" class="space-y-2 text-xs"></div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-4 space-y-3">
+          <h4 class="text-xs sm:text-sm font-extrabold text-slate-900">削除済みアカウント一覧（削除から24時間／1日以内のみ復旧可能）</h4>
+          <div id="adminDeletedAccountsList" class="space-y-2 text-xs"></div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-3">
+          <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 mb-2">最近のアクティビティログ</h4>
+          <div id="adminActivityLogsList" class="space-y-1.5 max-h-56 overflow-y-auto text-xs"></div>
+        </div>
+      </div>
+
+      <!-- タブ2：PW変更依頼＆名前変更回数申請（管理者返信対応） -->
+      <div id="adminTab_requests" class="admin-tab-panel hidden space-y-5">
+        <div>
+          <h4 class="text-sm font-extrabold text-slate-900 mb-2">パスワード変更依頼（現在のPW入力で照合後のみ変更・返信可能）</h4>
+          <div id="adminPwRequestsList" class="space-y-2.5"></div>
+        </div>
+        <div class="border-t border-slate-200 pt-4">
+          <h4 class="text-sm font-extrabold text-slate-900 mb-2">名前変更回数 追加申請（承認/却下・返信可能）</h4>
+          <div id="adminNameQuotaRequestsList" class="space-y-2.5"></div>
+        </div>
+      </div>
+
+      <!-- タブ3：テスト範囲＆共有問題パック -->
+      <div id="adminTab_scope" class="admin-tab-panel hidden space-y-5">
+        <form id="adminScopeNoticeForm" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <h4 class="text-sm font-extrabold text-slate-900">テスト範囲お知らせの投稿</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <select id="scopeSubjectSelect" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold">
+              <option value="数学I・A">数学I・A</option>
+              <option value="国語">国語</option>
+              <option value="理科">理科</option>
+              <option value="社会">社会</option>
+              <option value="英語">英語</option>
+            </select>
+            <input id="scopeTitleInput" type="text" required placeholder="テスト名・範囲タイトル（例：1学期中間テスト範囲）"
+              class="sm:col-span-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm" />
+          </div>
+          <textarea id="scopeBodyInput" rows="2" required placeholder="出題範囲・注意点・提出期限などを入力"
+            class="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs sm:text-sm"></textarea>
+          <button type="submit" class="navy-btn px-4 py-2 text-xs">お知らせを掲載</button>
+        </form>
+
+        <form id="adminSharedPackForm" class="space-y-3 bg-amber-50/60 p-4 rounded-xl border border-amber-200">
+          <h4 class="text-sm font-extrabold text-slate-900">テスト範囲に即した共有問題パックを作成（全アカウントへ配信・本人が受入選択）</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <select id="sharedPackSubjectSelect" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold">
+              <option value="数学I・A">数学I・A</option>
+              <option value="国語">国語</option>
+              <option value="理科">理科</option>
+              <option value="社会">社会</option>
+              <option value="英語">英語</option>
+            </select>
+            <input id="sharedPackTitleInput" type="text" required placeholder="共有パック名（例：中間テスト対策 重要10選）"
+              class="sm:col-span-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm" />
+          </div>
+          <textarea id="sharedPackLinesInput" rows="4" required placeholder="1行1問で入力（例：&#10;光合成が行われる細胞小器官は？ : 葉緑体&#10;平方完成の頂点 (p, q) の y座標は？ : q）"
+            class="w-full rounded-xl border border-slate-300 bg-white p-2.5 text-xs sm:text-sm"></textarea>
+          <button type="submit" class="amber-btn px-4 py-2 text-xs">全アカウントへ共有パックを配信</button>
+        </form>
+
+        <div id="adminPublishedScopesList" class="space-y-2 text-xs"></div>
+      </div>
+
+      <!-- タブ4：管理者 公式問題OCR追加 -->
+      <div id="adminTab_ocr" class="admin-tab-panel hidden space-y-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="adminOcrSubjectSelect" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold">
+            <option value="数学I・A">数学I・A</option>
+            <option value="国語">国語</option>
+            <option value="理科">理科</option>
+            <option value="社会">社会</option>
+            <option value="英語">英語</option>
+          </select>
+          <input id="adminOcrFileInput" type="file" accept="image/*" multiple class="text-xs" />
+        </div>
+        <div id="adminOcrStatus" class="text-xs font-bold text-slate-600"></div>
+        <textarea id="adminOcrText" rows="4" placeholder="OCR抽出テキスト（編集可）" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs sm:text-sm"></textarea>
+        <button id="btnAdminPublishOcr" type="button" class="navy-btn px-4 py-2 text-xs">
+          公式共通問題として追加
+        </button>
+      </div>
+
+      <!-- タブ5：意見・要望受信箱（管理者返信対応） -->
+      <div id="adminTab_feedback" class="admin-tab-panel hidden space-y-2.5">
+        <div id="adminFeedbackInboxList" class="space-y-2.5 text-xs"></div>
+      </div>
+
+      <!-- タブ6：別デバイス連携・クラウド同期・学習データ・JSONスナップショット -->
+      <div id="adminTab_sync" class="admin-tab-panel hidden space-y-4 text-xs">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <h4 class="text-sm font-extrabold text-slate-900">別デバイスとのクラウド同期設定（Firebase Realtime Database REST連携対応）</h4>
+          <p class="text-slate-600 leading-relaxed">
+            別端末（友達の端末・スマホ・PC・タブレット）で作られたアカウントや学習データ・申請も自動でマージ同期するには、同期ルームIDとクラウド同期URLを設定してください。
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label for="syncRoomKeyInput" class="block font-bold text-slate-700 mb-1">同期ルームID</label>
+              <input id="syncRoomKeyInput" type="text" placeholder="例：class1a-testprep-room"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label for="syncEndpointInput" class="block font-bold text-slate-700 mb-1">クラウド同期URL（任意・Firebase RTDB等）</label>
+              <input id="syncEndpointInput" type="url" placeholder="https://example-default-rtdb.firebaseio.com"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs" />
+            </div>
+          </div>
+          <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+            <input id="syncAutoToggle" type="checkbox" checked class="rounded border-slate-300" />
+            <span>アカウント作成・演習完了・申請・意見送信時に自動でクラウド同期する</span>
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <button id="btnSaveSyncConfig" type="button" class="navy-btn px-4 py-2 text-xs">同期設定を保存</button>
+            <button id="btnCloudPushNow" type="button" class="amber-btn px-4 py-2 text-xs">クラウドへ今すぐ送信</button>
+            <button id="btnCloudPullNow" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 text-slate-800">クラウドから最新取得</button>
+          </div>
+          <div id="syncStatusText" class="font-bold text-slate-700"></div>
+        </div>
+
+        <!-- 全アカウント学習データ（スコア・正答率・履歴）一覧＆CSV出力 -->
+        <div class="p-4 rounded-xl bg-white border border-slate-200 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-sm font-extrabold text-slate-900">全アカウント学習データ一覧（スコア・正答率・履歴）</h4>
+            <button id="btnExportLearningCsv" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#162b49] text-white hover:bg-[#1e3a5f]">
+              学習データCSVをダウンロード
+            </button>
+          </div>
+          <div id="adminLearningStatsList" class="space-y-2 max-h-64 overflow-y-auto"></div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white border border-slate-200 space-y-3">
+          <h4 class="text-sm font-extrabold text-slate-900">JSONスナップショット書き出し・読み込み（オフライン別端末移行）</h4>
+          <div class="flex flex-wrap gap-2">
+            <button id="btnExportSnapshot" type="button" class="navy-btn px-4 py-2 text-xs">全データJSONを書き出し</button>
+            <label class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 cursor-pointer">
+              JSONスナップショットを読み込み
+              <input id="inputImportSnapshot" type="file" accept="application/json,.json" class="hidden" />
+            </label>
+          </div>
+          <textarea id="snapshotJsonArea" rows="5" placeholder="書き出したJSONスナップショットがここに表示されます。別端末へ貼り付けて読み込むこともできます。"
+            class="w-full rounded-xl border border-slate-300 p-2.5 text-xs font-mono"></textarea>
+          <button id="btnApplySnapshotText" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white">
+            テキスト欄のJSONを反映する
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // =========================================================================
+      // 1. 定数・ストレージキー定義
+      // =========================================================================
+      const SUBJECTS = ["数学I・A", "国語", "理科", "社会", "英語"];
+      const INITIAL_ADMIN_NAME = "管理者";
+      const INITIAL_ADMIN_PIN = "1051";
+      const MAX_FREE_NAME_CHANGES = 3;
+      const MAX_PIN_ATTEMPTS = 3;
+      const RECOVERY_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+      const STORAGE_KEYS = {
+        accounts: "testprep_v51_accounts_v1",
+        deletedAccounts: "testprep_v52_deleted_accounts_v1",
+        recoveryRequests: "testprep_v52_recovery_requests_v1",
+        session: "testprep_v51_session_v1",
+        officialQuestions: "testprep_v51_official_questions_v1",
+        userDataPrefix: "testprep_v51_user_data_",
+        activityLogs: "testprep_v51_activity_logs_v1",
+        feedbacks: "testprep_v51_feedbacks_v1",
+        pwRequests: "testprep_v51_pw_requests_v1",
+        nameQuotaRequests: "testprep_v51_name_quota_requests_v1",
+        testScopes: "testprep_v51_test_scopes_v1",
+        sharedPacks: "testprep_v51_shared_packs_v1",
+        syncConfig: "testprep_v51_sync_config_v1"
+      };
+
+      const BLOCKED_NAME_PATTERNS = [
+        /セックス/i, /せっくす/i, /sex/i, /エロ/i, /えろ/i, /ちんこ/i, /ちんぽ/i,
+        /まんこ/i, /おっぱい/i, /ふぇら/i, /フェラ/i, /オナニー/i, /自慰/i, /うんこ/i, /うんち/i,
+        /死ね/i, /ころす/i, /殺す/i, /ばか/i, /あほ/i, /くそ/i, /クソ/i,
+        /porn/i, /hentai/i, /nude/i
+      ];
+
+      // 5教科それぞれの実用的・明確な高1問題テンプレート（選択肢の重複・文言不備を解消）
+      const SUBJECT_SEED_TEMPLATES = {
+        "数学I・A": [
+          {
+            unit: "数と式",
+            prompt: "展開式 (x + 3)(x - 5) を展開した式として正しいものはどれですか？",
+            answer: "x² - 2x - 15",
+            distractors: ["x² + 2x - 15", "x² - 2x + 15", "x² - 8x - 15"],
+            hint1: "和と積の公式 (x + a)(x + b) = x² + (a + b)x + ab を使います。",
+            hint2: "xの係数は 3 + (-5) = -2、定数項は 3 × (-5) = -15 です。",
+            explanation: "(x + 3)(x - 5) = x² + (3 - 5)x + 3×(-5) = x² - 2x - 15 になります。"
+          },
+          {
+            unit: "二次関数",
+            prompt: "二次関数 y = 2(x - 1)² + 3 のグラフの頂点の座標はどれですか？",
+            answer: "(1, 3)",
+            distractors: ["(-1, 3)", "(1, -3)", "(-1, -3)"],
+            hint1: "y = a(x - p)² + q の形のとき、頂点は (p, q) です。",
+            hint2: "x - 1 = 0 となる x の値が 1、後ろの定数項が 3 です。",
+            explanation: "y = 2(x - 1)² + 3 は y = 2x² を x軸方向に1、y軸方向に3平行移動した放物線なので頂点は (1, 3) です。"
+          },
+          {
+            unit: "三角比",
+            prompt: "直角三角形において、斜辺の長さを r、対辺の長さを y とするとき、sinθ を表す式はどれですか？",
+            answer: "y / r",
+            distractors: ["x / r", "y / x", "r / y"],
+            hint1: "sin はサイン（斜辺に対する対辺の比）です。",
+            hint2: "分母に斜辺 r、分子に対辺 y を置きます。",
+            explanation: "定義より sinθ = (対辺) / (斜辺) = y / r です。"
+          },
+          {
+            unit: "集合と命題",
+            prompt: "条件 p が条件 q であるための「必要条件」であるとき、成り立つ包含関係はどれですか？",
+            answer: "p ⊃ q（Q ⊂ P）",
+            distractors: ["p ⊂ q（P ⊂ Q）", "p = q", "p ∩ q = ∅"],
+            hint1: "「必要条件」は大きい側（包まれる側ではなく包む側）になります。",
+            hint2: "q ならば p が真（Q ⊂ P）のとき、p は q の必要条件です。",
+            explanation: "集合Qが集合Pに含まれるとき、pはqであるための必要条件となります。"
+          },
+          {
+            unit: "データの分析",
+            prompt: "データの散らばりの度合いを表す指標として適切でないものはどれですか？",
+            answer: "最頻値（モード）",
+            distractors: ["分散", "標準偏差", "四分位範囲"],
+            hint1: "最頻値は「代表値」の一つです。",
+            hint2: "分散・標準偏差・四分位範囲はいずれも散らばりを測る指標です。",
+            explanation: "分散・標準偏差・四分位範囲は散らばりを示し、最頻値は分布の中心傾向を表す代表値です。"
+          }
+        ],
+        "国語": [
+          {
+            unit: "現代文・評論文",
+            prompt: "評論文で筆者が提示する「対比構造」を読み取る目的として最も適切なものはどれですか？",
+            answer: "筆者が重視する立場や主張の輪郭を際立たせるため",
+            distractors: ["引用文献のページ数を数えるため", "段落ごとの文字数をそろえるため", "漢字の画数を確認するため"],
+            hint1: "「〜ではなく〜である」「一方で〜」などの表現に注目します。",
+            hint2: "従来の見解や対立概念と比べることで、筆者の主張がはっきりします。",
+            explanation: "対比構造を押さえることで、筆者が何を批判し、どの視点を支持しているかが明確になります。"
+          },
+          {
+            unit: "古文・助動詞",
+            prompt: "古典文法で、動詞の未然形に接続し、推量・意志・勧誘・適当・仮定などの意味を表す助動詞はどれですか？",
+            answer: "む",
+            distractors: ["たり", "けり", "べし"],
+            hint1: "「見む」「行かむ」のように未然形につきます。",
+            hint2: "文脈によって「〜だろう（推量）」や「〜しよう（意志）」と訳します。",
+            explanation: "助動詞「む」は未然形接続で、推量・意志・適当・仮定・婉曲などの意味を表します。"
+          },
+          {
+            unit: "古文・敬語",
+            prompt: "動作の受け手や話題の人物を高める敬語の種類はどれですか？",
+            answer: "謙譲語",
+            distractors: ["尊敬語", "丁寧語", "指示語"],
+            hint1: "話し手または行為者がへりくだることで、動作の向かう先や目上の人への敬意を表します。",
+            hint2: "「申す」「参る」「奉る」などが代表例です。",
+            explanation: "謙譲語は行為の向かう先（受け手・対象）を立てる敬語です。"
+          },
+          {
+            unit: "漢文・句形",
+            prompt: "漢文で「豈（あに）〜哉（や）」の句形が表す基本的な意味はどれですか？",
+            answer: "反語（どうして〜だろうか、いや〜ない）",
+            distractors: ["単純な過去", "強い禁止", "原因・理由"],
+            hint1: "疑問の形をとりながら、強い否定の気持ちを込めます。",
+            hint2: "「豈〜乎」なども同じ反語の代表句形です。",
+            explanation: "「豈〜哉」は反語を表し、「どうして〜であろうか、いや〜ない」と読み下します。"
+          },
+          {
+            unit: "文学史・表現",
+            prompt: "自然の景物や季節の推移に、登場人物の心情を重ね合わせて描く表現技法は何と呼ばれますか？",
+            answer: "景情一致（情景一致）",
+            distractors: ["枕詞", "懸詞", "反復法"],
+            hint1: "「景色」と「心情」が一致する様子を指します。",
+            hint2: "雨や秋の夕暮れが悲しみや孤独感と呼応する場面などで使われます。",
+            explanation: "景情一致は、自然描写と登場人物の感情を響き合わせる表現技法です。"
+          }
+        ],
+        "理科": [
+          {
+            unit: "生物・細胞",
+            prompt: "真核細胞において、呼吸（好気呼吸）によるATP産生が主に行われる細胞小器官はどれですか？",
+            answer: "ミトコンドリア",
+            distractors: ["葉緑体", "液胞", "中心体"],
+            hint1: "植物細胞にも動物細胞にも含まれる二重膜の細胞小器官です。",
+            hint2: "有機物を分解してエネルギーを取り出す働きを担います。",
+            explanation: "ミトコンドリアは呼吸の場であり、効率よくATPを合成します。"
+          },
+          {
+            unit: "化学・物質量",
+            prompt: "標準状態（0℃、1.013×10⁵ Pa）において、理想気体 1 mol が占める体積はどれですか？",
+            answer: "22.4 L",
+            distractors: ["11.2 L", "44.8 L", "1.00 L"],
+            hint1: "気体の種類に関わらず一定になるモル体積の値です。",
+            hint2: "2 mol ならば 44.8 L になります。",
+            explanation: "標準状態では、あらゆる気体 1 mol の体積は約 22.4 L です。"
+          },
+          {
+            unit: "物理・力学",
+            prompt: "一直線上を運動する物体の速度が時間とともに一定の割合で変化する運動を何といいますか？",
+            answer: "等加速度直線運動",
+            distractors: ["等速円運動", "単振動", "自由落下運動の特殊例のみ"],
+            hint1: "加速度が一定のまま直線的に進む運動です。",
+            hint2: "v = v₀ + at や x = v₀t + 1/2at² の公式が成り立ちます。",
+            explanation: "一定の加速度で直線運動することを等加速度直線運動といいます。"
+          },
+          {
+            unit: "地学・地球環境",
+            prompt: "大気圏において、高度が高くなるほど気温が下がり、対流が活発に起こる層はどれですか？",
+            answer: "対流圏",
+            distractors: ["成層圏", "中間圏", "熱圏"],
+            hint1: "地表に最も近く、気象現象の多くが起こる層です。",
+            hint2: "成層圏にはオゾン層があり、高度とともに気温が上がります。",
+            explanation: "対流圏では高度が100m上がるごとに気温が約0.65℃下がり、上下の対流が起きます。"
+          },
+          {
+            unit: "生物・遺伝",
+            prompt: "DNAの塩基対の組み合わせとして正しいものはどれですか？",
+            answer: "アデニン（A）とチミン（T）、グアニン（G）とシトシン（C）",
+            distractors: ["アデニン（A）とグアニン（G）、チミン（T）とシトシン（C）", "アデニン（A）とシトシン（C）、グアニン（G）とチミン（T）", "アデニン（A）とウラシル（U）のみ"],
+            hint1: "AはTと、GはCと相補的に結合します。",
+            hint2: "RNAではTの代わりにウラシル（U）が使われます。",
+            explanation: "DNA二重らせんでは A-T、G-C の塩基対が形成されます。"
+          }
+        ],
+        "社会": [
+          {
+            unit: "現代社会・政治",
+            prompt: "国家権力が一箇所に集中して濫用されるのを防ぐため、立法・行政・司法に分ける仕組みを何といいますか？",
+            answer: "三権分立",
+            distractors: ["直接民主制", "連邦制", "委任統治"],
+            hint1: "国会・内閣・裁判所が互いに抑制と均衡を保つ仕組みです。",
+            hint2: "立憲主義を支える基本原理の一つです。",
+            explanation: "権力の集中と濫用を防ぐため、立法・行政・司法を分離・抑制させる仕組みが三権分立です。"
+          },
+          {
+            unit: "現代社会・経済",
+            prompt: "中央銀行が政策金利を引き上げたり、公開市場操作で市場の通貨量を減らしたりする金融政策の狙いとして代表的なものはどれですか？",
+            answer: "景気の過熱やインフレの抑制",
+            distractors: ["通貨価値の意図的な暴落", "国債発行の無制限化", "関税率の撤廃"],
+            hint1: "お金を借りにくくしたり市場の資金を減らしたりすると需要はどうなるかを考えます。",
+            hint2: "物価上昇が速すぎるときに引き締めを行います。",
+            explanation: "金融引き締めは資金需要を抑え、景気過熱や物価上昇（インフレ）を落ち着かせる目的で行われます。"
+          },
+          {
+            unit: "歴史・日本史",
+            prompt: "鎌倉幕府の執権・北条泰時が武家社会の裁判基準として1232年に制定した法典はどれですか？",
+            answer: "御成敗式目（貞永式目）",
+            distractors: ["大宝律令", "武家諸法度", "公事方御定書"],
+            hint1: "御家人の慣例や道理をもとに作られた武士最初の本格的法典です。",
+            hint2: "「ごせいばいしきもく」または「じょうえいしきもく」と呼ばれます。",
+            explanation: "1232年に制定された御成敗式目（貞永式目）は、武家法の基礎となりました。"
+          },
+          {
+            unit: "地理・地図と地形",
+            prompt: "等高線の間隔が地図上で非常に狭くなっている地形の特徴として正しいものはどれですか？",
+            answer: "傾斜が急である",
+            distractors: ["完全に平坦な平野である", "海面より低い干拓地である", "気温が常に一定である"],
+            hint1: "短い水平距離で標高が大きく変化している場所です。",
+            hint2: "崖や急な斜面では等高線が密集して見えます。",
+            explanation: "等高線の間隔が狭いほど、短い距離で高度差が大きく、傾斜が急であることを示します。"
+          },
+          {
+            unit: "公共・契約と消費",
+            prompt: "訪問販売や電話勧誘販売などで契約した場合、一定期間内であれば無条件で契約を解除できる制度を何といいますか？",
+            answer: "クーリング・オフ",
+            distractors: ["時効制度", "仮差押え", "相殺制度"],
+            hint1: "冷静に考え直す時間を与える消費者保護の制度です。",
+            hint2: "取引形態によって法定の期間が定められています。",
+            explanation: "クーリング・オフは、不意打ち性の高い取引などにおいて一定期間内に契約解除を認める制度です。"
+          }
+        ],
+        "英語": [
+          {
+            unit: "時制・基本文型",
+            prompt: "英文 'She has lived in Kyoto since 2020.' が表す意味として最も適切なものはどれですか？",
+            answer: "彼女は2020年からずっと京都に住んでいる",
+            distractors: ["彼女は2020年に京都へ引っ越す予定だ", "彼女は2020年まで京都に住んでいたが今はいない", "彼女は京都に行ったことがない"],
+            hint1: "have/has + 過去分詞（現在完了）と since 2020 に注目します。",
+            hint2: "過去から現在まで続いている「継続」を表します。",
+            explanation: "現在完了（has lived）と since（〜以来）の組み合わせで、2020年から現在までの継続を表します。"
+          },
+          {
+            unit: "助動詞・表現",
+            prompt: "空欄に入る最も適切な表現を選びなさい：You (     ) hurry. We have plenty of time.",
+            answer: "don't have to",
+            distractors: ["must", "have to", "ought to"],
+            hint1: "後ろに 'We have plenty of time.'（時間はたっぷりある）と続いています。",
+            hint2: "「急ぐ必要はない」を表す表現を選びます。",
+            explanation: "don't have to + 動詞の原形で「〜する必要はない」という意味になります（must not は「禁止」）。"
+          },
+          {
+            unit: "不定詞・動名詞",
+            prompt: "文脈に合う語を選びなさい：He decided (     ) abroad next year.",
+            answer: "to study",
+            distractors: ["studying", "studied", "studies"],
+            hint1: "decide は後ろに to 不定詞をとる代表的な動詞です。",
+            hint2: "「来年海外で学ぶことを決めた」という意味になります。",
+            explanation: "decide to + 動詞の原形で「〜することを決める」を表します。"
+          },
+          {
+            unit: "関係詞",
+            prompt: "次の2文を1つにまとめるとき、空欄に入る最も適切な語はどれですか：The book (     ) I bought yesterday is interesting.",
+            answer: "which",
+            distractors: ["who", "whose", "where"],
+            hint1: "先行詞は The book（物）です。",
+            hint2: "bought の目的語にあたる関係代名詞を選びます。",
+            explanation: "先行詞が物（The book）で目的格の関係代名詞なので which（または that、省略も可）が適します。"
+          },
+          {
+            unit: "比較表現",
+            prompt: "次の英文と同じ意味を表す表現はどれですか：This river is longer than any other river in the region.",
+            answer: "No other river in the region is as long as this river.",
+            distractors: ["This river is shorter than other rivers.", "No river in the region is long.", "Other rivers are longer than this river."],
+            hint1: "「比較級 + than any other + 単数名詞」は最上級や否定比較に書き換えられます。",
+            hint2: "「この地域にはこの川ほど長い他の川はない」という形になります。",
+            explanation: "No other ... is as + 原級 + as ... で「他のどの〜も…ほど〜ではない」という最上級の書き換えになります。"
+          }
+        ]
+      };
+
+      // =========================================================================
+      // 2. アプリケーション状態
+      // =========================================================================
+      const appState = {
+        currentAccountId: null,
+        userData: null,
+        activeSubject: SUBJECTS[0],
+        screenMode: "home", // "home" | "workspace"
+        quizSession: null,
+        lastQuizConfig: null,
+        isSyncing: false
+      };
+
+      // =========================================================================
+      // 3. ユーティリティ・ストレージ関数
+      // =========================================================================
+      function loadJson(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return fallback;
+          return JSON.parse(raw);
+        } catch (err) {
+          console.error("Storage load error for key:", key, err);
+          return fallback;
+        }
+      }
+
+      function saveJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+          return true;
+        } catch (err) {
+          console.error("Storage save error for key:", key, err);
+          return false;
+        }
+      }
+
+      function normalizePin(raw) {
+        if (typeof raw !== "string" && typeof raw !== "number") return "";
+        const half = String(raw).replace(/[０-９]/g, ch =>
+          String.fromCharCode(ch.charCodeAt(0) - 0xfee0)
+        ).trim();
+        return /^\d{4}$/.test(half) ? half : "";
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatTime(ts) {
+        if (!ts) return "-";
+        try {
+          return new Date(ts).toLocaleString("ja-JP", {
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+          });
+        } catch (_) {
+          return String(ts);
+        }
+      }
+
+      function showToast(message, type = "info") {
+        const banner = document.getElementById("globalToast");
+        const inner = document.getElementById("globalToastInner");
+        const text = document.getElementById("globalToastText");
+        if (!banner || !inner || !text) return;
+
+        inner.className = "rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold border flex items-center justify-between gap-3 shadow-sm ";
+        if (type === "error") {
+          inner.className += "bg-red-50 text-red-900 border-red-300";
+        } else if (type === "success") {
+          inner.className += "bg-emerald-50 text-emerald-900 border-emerald-300";
+        } else {
+          inner.className += "bg-slate-900 text-white border-slate-700";
+        }
+        text.textContent = message;
+        banner.classList.remove("hidden");
+      }
+
+      function hideToast() {
+        const banner = document.getElementById("globalToast");
+        if (banner) banner.classList.add("hidden");
+      }
+
+      function addActivityLog(actorName, action, detail = "") {
+        const logs = loadJson(STORAGE_KEYS.activityLogs, []);
+        logs.unshift({
+          id: "log_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+          time: Date.now(),
+          actor: actorName || "不明",
+          action,
+          detail
+        });
+        if (logs.length > 250) logs.length = 250;
+        saveJson(STORAGE_KEYS.activityLogs, logs);
+      }
+
+      // =========================================================================
+      // 4. アカウント・処罰・削除復旧（1日以内）管理
+      // =========================================================================
+      function ensureInitialAccounts() {
+        let accounts = loadJson(STORAGE_KEYS.accounts, []);
+        if (!Array.isArray(accounts)) accounts = [];
+
+        let admin = accounts.find(a => a.isBuiltinAdmin || a.name === INITIAL_ADMIN_NAME);
+        if (!admin) {
+          admin = {
+            id: "acc_admin_builtin",
+            name: INITIAL_ADMIN_NAME,
+            pin: INITIAL_ADMIN_PIN,
+            role: "admin",
+            isBuiltinAdmin: true,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            nameChangeCount: 0,
+            extraNameQuota: 0,
+            failedAttempts: 0,
+            lockoutUntil: 0,
+            punishment: { type: "none", until: 0, reason: "" }
+          };
+          accounts.unshift(admin);
+          saveJson(STORAGE_KEYS.accounts, accounts);
+        }
+        return accounts;
+      }
+
+      function getCurrentAccount() {
+        if (!appState.currentAccountId) return null;
+        const accounts = ensureInitialAccounts();
+        return accounts.find(a => a.id === appState.currentAccountId) || null;
+      }
+
+      function isAdminAccount(account) {
+        return Boolean(account && (account.role === "admin" || account.isBuiltinAdmin));
+      }
+
+      function checkAccountPunishmentStatus(account) {
+        if (!account) return { blocked: true, message: "アカウントが見つかりません。" };
+        const now = Date.now();
+        if (account.lockoutUntil && account.lockoutUntil > now) {
+          const mins = Math.ceil((account.lockoutUntil - now) / 60000);
+          return { blocked: true, message: `パスワード誤入力が3回に達したため一時凍結中です（残り約${mins}分）。` };
+        }
+        const p = account.punishment || { type: "none", until: 0, reason: "" };
+        if (p.type === "frozen") {
+          return { blocked: true, message: `このアカウントは管理者により凍結されています。${p.reason ? "理由: " + p.reason : ""}` };
+        }
+        if (p.type === "suspended") {
+          if (!p.until || p.until > now) {
+            const untilText = p.until ? `（解除予定: ${formatTime(p.until)}）` : "";
+            return { blocked: true, message: `このアカウントは利用停止中です${untilText}。${p.reason ? "理由: " + p.reason : ""}` };
+          }
+        }
+        return { blocked: false, message: "" };
+      }
+
+      function validateAccountName(name) {
+        const trimmed = String(name || "").trim();
+        if (trimmed.length < 1 || trimmed.length > 20) {
+          return { ok: false, message: "アカウント名は1〜20文字で入力してください。" };
+        }
+        for (const pat of BLOCKED_NAME_PATTERNS) {
+          if (pat.test(trimmed)) {
+            return { ok: false, message: "不適切な語句が含まれるアカウント名は使用できません。" };
+          }
+        }
+        return { ok: true, value: trimmed };
+      }
+
+      function purgeExpiredDeletedAccounts() {
+        const deletedList = loadJson(STORAGE_KEYS.deletedAccounts, []);
+        const now = Date.now();
+        const remaining = [];
+        let changed = false;
+
+        for (const entry of deletedList) {
+          if (now - (entry.deletedAt || 0) > RECOVERY_WINDOW_MS) {
+            changed = true;
+            if (entry.account && entry.account.id) {
+              try {
+                localStorage.removeItem(STORAGE_KEYS.userDataPrefix + entry.account.id);
+              } catch (_) {}
+            }
+            addActivityLog("システム", "削除期限切れ抹消", `削除から24時間を経過したアカウント「${entry.account?.name || ""}」のデータを整理しました`);
+          } else {
+            remaining.push(entry);
+          }
+        }
+
+        if (changed) {
+          saveJson(STORAGE_KEYS.deletedAccounts, remaining);
+        }
+        return remaining;
+      }
+
+      function getRemainingRecoveryHours(deletedAt) {
+        const elapsed = Date.now() - (deletedAt || 0);
+        const remMs = Math.max(0, RECOVERY_WINDOW_MS - elapsed);
+        return Math.ceil(remMs / (60 * 60 * 1000));
+      }
+
+      // =========================================================================
+      // 5. 公式問題＆個人データ永続化（2層分離）
+      // =========================================================================
+      function buildSeedQuestionsForSubject(subject) {
+        const baseList = SUBJECT_SEED_TEMPLATES[subject] || SUBJECT_SEED_TEMPLATES["数学I・A"];
+        const generated = [];
+        for (let i = 0; i < 50; i++) {
+          const tpl = baseList[i % baseList.length];
+          const cycle = Math.floor(i / baseList.length) + 1;
+          const level = (i % 3) + 1;
+          const suffix = cycle > 1 ? `（演習 ${cycle}）` : "";
+          const choices = [tpl.answer, ...tpl.distractors].slice(0, 4);
+          generated.push({
+            id: `seed_${subject}_${i + 1}`,
+            subject,
+            unit: tpl.unit,
+            level,
+            type: i % 4 === 3 ? "descriptive" : "choice",
+            prompt: `${tpl.prompt}${suffix}`,
+            answer: tpl.answer,
+            choices,
+            hint1: tpl.hint1,
+            hint2: tpl.hint2,
+            explanation: tpl.explanation,
+            source: "official"
+          });
+        }
+        return generated;
+      }
+
+      function ensureOfficialQuestionsSeed() {
+        let official = loadJson(STORAGE_KEYS.officialQuestions, null);
+        if (!official || typeof official !== "object") {
+          official = {};
+        }
+        let updated = false;
+        for (const sub of SUBJECTS) {
+          if (!Array.isArray(official[sub]) || official[sub].length === 0) {
+            official[sub] = buildSeedQuestionsForSubject(sub);
+            updated = true;
+          }
+        }
+        if (updated) {
+          saveJson(STORAGE_KEYS.officialQuestions, official);
+        }
+        return official;
+      }
+
+      function createDefaultUserData() {
+        const unitPrefs = {};
+        for (const sub of SUBJECTS) {
+          const list = SUBJECT_SEED_TEMPLATES[sub] || [];
+          unitPrefs[sub] = list.map(item => item.unit);
+        }
+        return {
+          customQuestions: {},
+          acceptedPackIds: [],
+          dismissedPackIds: [],
+          difficultyBySubject: {
+            "数学I・A": 2,
+            "国語": 2,
+            "理科": 2,
+            "社会": 2,
+            "英語": 2
+          },
+          unitPrefs,
+          history: [],
+          wrongQuestionIds: [],
+          updatedAt: Date.now()
+        };
+      }
+
+      function loadUserData(accountId) {
+        const raw = loadJson(STORAGE_KEYS.userDataPrefix + accountId, null);
+        const def = createDefaultUserData();
+        if (!raw || typeof raw !== "object") return def;
+        return {
+          customQuestions: raw.customQuestions && typeof raw.customQuestions === "object" ? raw.customQuestions : {},
+          acceptedPackIds: Array.isArray(raw.acceptedPackIds) ? raw.acceptedPackIds : [],
+          dismissedPackIds: Array.isArray(raw.dismissedPackIds) ? raw.dismissedPackIds : [],
+          difficultyBySubject: Object.assign({}, def.difficultyBySubject, raw.difficultyBySubject || {}),
+          unitPrefs: Object.assign({}, def.unitPrefs, raw.unitPrefs || {}),
+          history: Array.isArray(raw.history) ? raw.history : [],
+          wrongQuestionIds: Array.isArray(raw.wrongQuestionIds) ? raw.wrongQuestionIds : [],
+          updatedAt: raw.updatedAt || Date.now()
+        };
+      }
+
+      function saveUserData(triggerAutoSync = true) {
+        if (!appState.currentAccountId || !appState.userData) return;
+        appState.userData.updatedAt = Date.now();
+        saveJson(STORAGE_KEYS.userDataPrefix + appState.currentAccountId, appState.userData);
+        if (triggerAutoSync) {
+          scheduleAutoSync();
+        }
+      }
+
+      function getCombinedQuestionsForSubject(subject) {
+        const official = ensureOfficialQuestionsSeed();
+        const officialList = Array.isArray(official[subject]) ? official[subject] : [];
+        const userData = appState.userData || createDefaultUserData();
+        const customList = Array.isArray(userData.customQuestions[subject]) ? userData.customQuestions[subject] : [];
+
+        const allPacks = loadJson(STORAGE_KEYS.sharedPacks, []);
+        const acceptedIds = Array.isArray(userData.acceptedPackIds) ? userData.acceptedPackIds : [];
+        const packQuestions = [];
+        for (const pack of allPacks) {
+          if (pack.subject === subject && acceptedIds.includes(pack.id) && Array.isArray(pack.questions)) {
+            packQuestions.push(...pack.questions);
+          }
+        }
+        return [...officialList, ...packQuestions, ...customList];
+      }
+
+      // =========================================================================
+      // 6. 認証・新規作成・自己削除・復旧依頼ハンドラ
+      // =========================================================================
+      function switchAuthTab(mode) {
+        const tabLogin = document.getElementById("tabAuthLogin");
+        const tabSignup = document.getElementById("tabAuthSignup");
+        const loginForm = document.getElementById("loginForm");
+        const signupForm = document.getElementById("signupForm");
+
+        document.getElementById("loginErrorMsg").textContent = "";
+        document.getElementById("signupErrorMsg").textContent = "";
+
+        if (mode === "signup") {
+          tabSignup.className = "py-2 rounded-lg text-xs sm:text-sm font-extrabold bg-[#b97724] text-white transition";
+          tabLogin.className = "py-2 rounded-lg text-xs sm:text-sm font-extrabold text-slate-600 hover:text-slate-900 transition";
+          loginForm.classList.add("hidden");
+          signupForm.classList.remove("hidden");
+        } else {
+          tabLogin.className = "py-2 rounded-lg text-xs sm:text-sm font-extrabold bg-[#162b49] text-white transition";
+          tabSignup.className = "py-2 rounded-lg text-xs sm:text-sm font-extrabold text-slate-600 hover:text-slate-900 transition";
+          signupForm.classList.add("hidden");
+          loginForm.classList.remove("hidden");
+        }
+      }
+
+      async function handleLoginSubmit(e) {
+        e.preventDefault();
+        const errEl = document.getElementById("loginErrorMsg");
+        errEl.textContent = "";
+
+        const rawName = document.getElementById("loginNameInput").value.trim();
+        const pin = normalizePin(document.getElementById("loginPinInput").value);
+
+        if (!rawName) {
+          errEl.textContent = "アカウント名を入力してください。";
+          return;
+        }
+        if (!pin) {
+          errEl.textContent = "パスワードは4桁の数字で入力してください。";
+          return;
+        }
+
+        // ログイン前にクラウド側からも最新アカウント・処罰状態を反映試行
+        await pullSnapshotFromCloud(true);
+
+        purgeExpiredDeletedAccounts();
+        const accounts = ensureInitialAccounts();
+        const target = accounts.find(a => a.name.toLowerCase() === rawName.toLowerCase());
+
+        if (!target) {
+          const deletedList = loadJson(STORAGE_KEYS.deletedAccounts, []);
+          const deletedMatch = deletedList.find(d => d.account?.name?.toLowerCase() === rawName.toLowerCase());
+          if (deletedMatch) {
+            errEl.textContent = "このアカウントは削除済みです。削除から24時間以内であれば下の「削除アカウントの復旧依頼」から復旧を申請できます。";
+          } else {
+            errEl.textContent = "アカウント名またはパスワードが正しくありません。";
+          }
+          return;
+        }
+
+        const punishment = checkAccountPunishmentStatus(target);
+        if (punishment.blocked) {
+          errEl.textContent = punishment.message;
+          return;
+        }
+
+        if (target.pin !== pin) {
+          target.failedAttempts = (target.failedAttempts || 0) + 1;
+          target.updatedAt = Date.now();
+          if (target.failedAttempts >= MAX_PIN_ATTEMPTS) {
+            target.lockoutUntil = Date.now() + 15 * 60 * 1000;
+            target.failedAttempts = 0;
+            errEl.textContent = "パスワードを3回間違えたため、15分間一時凍結されました。";
+          } else {
+            const left = MAX_PIN_ATTEMPTS - target.failedAttempts;
+            errEl.textContent = `パスワードが一致しません（あと${left}回間違えると一時凍結されます）。`;
+          }
+          saveJson(STORAGE_KEYS.accounts, accounts);
+          addActivityLog(target.name, "ログイン失敗", errEl.textContent);
+          scheduleAutoSync();
+          return;
+        }
+
+        target.failedAttempts = 0;
+        target.lockoutUntil = 0;
+        target.updatedAt = Date.now();
+        saveJson(STORAGE_KEYS.accounts, accounts);
+
+        appState.currentAccountId = target.id;
+        appState.userData = loadUserData(target.id);
+        appState.screenMode = "home";
+        appState.quizSession = null;
+
+        saveJson(STORAGE_KEYS.session, { accountId: target.id, loginAt: Date.now() });
+        document.getElementById("loginForm").reset();
+        addActivityLog(target.name, "ログイン成功", isAdminAccount(target) ? "管理者ログイン" : "一般ユーザーログイン");
+        scheduleAutoSync();
+        showToast(`${target.name} さん、おかえりなさい！`, "success");
+        renderAllScreens();
+      }
+
+      function handleSignupSubmit(e) {
+        e.preventDefault();
+        const errEl = document.getElementById("signupErrorMsg");
+        errEl.textContent = "";
+
+        const nameCheck = validateAccountName(document.getElementById("signupNameInput").value);
+        const pin = normalizePin(document.getElementById("signupPinInput").value);
+        const pinConfirm = normalizePin(document.getElementById("signupPinConfirmInput").value);
+
+        if (!nameCheck.ok) {
+          errEl.textContent = nameCheck.message;
+          return;
+        }
+        if (!pin) {
+          errEl.textContent = "パスワードは半角数字4桁で入力してください。";
+          return;
+        }
+        if (pin !== pinConfirm) {
+          errEl.textContent = "確認用パスワードが一致しません。";
+          return;
+        }
+
+        const accounts = ensureInitialAccounts();
+        const exists = accounts.some(a => a.name.toLowerCase() === nameCheck.value.toLowerCase());
+        if (exists) {
+          errEl.textContent = "そのアカウント名はすでに使われています。";
+          return;
+        }
+
+        const nowTs = Date.now();
+        const newAcc = {
+          id: "acc_" + nowTs + "_" + Math.random().toString(36).slice(2, 6),
+          name: nameCheck.value,
+          pin,
+          role: "user",
+          isBuiltinAdmin: false,
+          createdAt: nowTs,
+          updatedAt: nowTs,
+          nameChangeCount: 0,
+          extraNameQuota: 0,
+          failedAttempts: 0,
+          lockoutUntil: 0,
+          punishment: { type: "none", until: 0, reason: "" }
+        };
+
+        accounts.push(newAcc);
+        saveJson(STORAGE_KEYS.accounts, accounts);
+        saveJson(STORAGE_KEYS.userDataPrefix + newAcc.id, createDefaultUserData());
+
+        appState.currentAccountId = newAcc.id;
+        appState.userData = loadUserData(newAcc.id);
+        appState.screenMode = "home";
+        appState.quizSession = null;
+        saveJson(STORAGE_KEYS.session, { accountId: newAcc.id, loginAt: nowTs });
+
+        document.getElementById("signupForm").reset();
+        errEl.textContent = "";
+        switchAuthTab("login");
+
+        addActivityLog(newAcc.name, "新規アカウント作成", "アカウントを作成してログインしました");
+        scheduleAutoSync();
+        showToast(`アカウント「${newAcc.name}」を作成しました！`, "success");
+        renderAllScreens();
+      }
+
+      function handleLogout() {
+        const acc = getCurrentAccount();
+        if (acc) {
+          addActivityLog(acc.name, "ログアウト", "");
+        }
+        appState.currentAccountId = null;
+        appState.userData = null;
+        appState.quizSession = null;
+        appState.screenMode = "home";
+        localStorage.removeItem(STORAGE_KEYS.session);
+        renderAllScreens();
+        showToast("ログアウトしました。", "info");
+      }
+
+      // 一般ユーザー自己削除（現在の4桁PW一致で削除・削除後1日以内は管理者復旧可能）
+      function openSelfDeleteModal() {
+        const acc = getCurrentAccount();
+        if (!acc || isAdminAccount(acc)) {
+          showToast("管理者アカウントは自己削除できません。", "error");
+          return;
+        }
+        document.getElementById("selfDeleteForm").reset();
+        document.getElementById("selfDeleteErrorMsg").textContent = "";
+        document.getElementById("selfDeleteModal").classList.remove("hidden");
+      }
+
+      function handleSelfDeleteSubmit(e) {
+        e.preventDefault();
+        const errEl = document.getElementById("selfDeleteErrorMsg");
+        errEl.textContent = "";
+
+        const acc = getCurrentAccount();
+        if (!acc || isAdminAccount(acc)) {
+          errEl.textContent = "このアカウントは削除できません。";
+          return;
+        }
+
+        const pin = normalizePin(document.getElementById("selfDeletePinInput").value);
+        if (!pin) {
+          errEl.textContent = "現在のパスワードを4桁の数字で入力してください。";
+          return;
+        }
+        if (acc.pin !== pin) {
+          errEl.textContent = "現在のパスワードが一致しません。削除は実行されませんでした。";
+          return;
+        }
+
+        const accounts = ensureInitialAccounts();
+        const idx = accounts.findIndex(a => a.id === acc.id);
+        if (idx === -1) {
+          errEl.textContent = "アカウント情報が見つかりません。";
+          return;
+        }
+
+        const [removedAccount] = accounts.splice(idx, 1);
+        saveJson(STORAGE_KEYS.accounts, accounts);
+
+        const deletedList = loadJson(STORAGE_KEYS.deletedAccounts, []);
+        deletedList.unshift({
+          id: "del_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          deletedAt: Date.now(),
+          deletedBy: "self",
+          account: removedAccount,
+          userData: loadUserData(removedAccount.id)
+        });
+        saveJson(STORAGE_KEYS.deletedAccounts, deletedList);
+
+        appState.currentAccountId = null;
+        appState.userData = null;
+        appState.quizSession = null;
+        localStorage.removeItem(STORAGE_KEYS.session);
+        document.getElementById("selfDeleteModal").classList.add("hidden");
+
+        addActivityLog(removedAccount.name, "アカウント自己削除", "パスワード照合一致により削除（24時間以内は管理者復旧可能）");
+        scheduleAutoSync();
+        showToast("アカウントを削除しました。削除から1日以内であればログイン画面から復旧を依頼できます。", "info");
+        renderAllScreens();
+      }
+
+      // ログインページからの復旧依頼送信
+      async function handleSubmitRecoveryRequest() {
+        const nameInput = document.getElementById("recoveryAccountNameInput");
+        const noteInput = document.getElementById("recoveryNoteInput");
+        const statusEl = document.getElementById("recoveryStatusMessage");
+
+        const targetName = nameInput.value.trim();
+        const note = noteInput.value.trim();
+        if (!targetName) {
+          statusEl.textContent = "削除されたアカウント名を入力してください。";
+          return;
+        }
+
+        await pullSnapshotFromCloud(true);
+        purgeExpiredDeletedAccounts();
+        const deletedList = loadJson(STORAGE_KEYS.deletedAccounts, []);
+        const matched = deletedList.find(d => d.account?.name?.toLowerCase() === targetName.toLowerCase());
+
+        if (!matched) {
+          statusEl.textContent = "削除後24時間以内の対象アカウントが見つかりませんでした（期限切れまたは未削除の可能性があります）。";
+          return;
+        }
+
+        const requests = loadJson(STORAGE_KEYS.recoveryRequests, []);
+        requests.unshift({
+          id: "rec_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          accountName: matched.account.name,
+          deletedId: matched.id,
+          note: note || "復旧を希望します",
+          createdAt: Date.now(),
+          status: "pending",
+          adminReply: ""
+        });
+        saveJson(STORAGE_KEYS.recoveryRequests, requests);
+
+        nameInput.value = "";
+        noteInput.value = "";
+        statusEl.textContent = `「${matched.account.name}」の復旧依頼を送信しました。管理者の対応をお待ちください。`;
+        addActivityLog(matched.account.name, "削除アカウント復旧依頼", note || "復旧依頼送信");
+        scheduleAutoSync();
+      }
+
+      // =========================================================================
+      // 7. 名前変更・PW変更依頼・意見要望（管理者返信対応）
+      // =========================================================================
+      function getAllowedNameChanges(account) {
+        return MAX_FREE_NAME_CHANGES + (account.extraNameQuota || 0);
+      }
+
+      function openNameChangeModal() {
+        const acc = getCurrentAccount();
+        if (!acc) return;
+        if (isAdminAccount(acc)) {
+          openAdminModal("accounts");
+          return;
+        }
+
+        const used = acc.nameChangeCount || 0;
+        const allowed = getAllowedNameChanges(acc);
+        const remaining = Math.max(0, allowed - used);
+
+        document.getElementById("nameQuotaStatusText").textContent =
+          `現在のアカウント名: ${acc.name} ／ 変更済み: ${used}回 ／ 上限: ${allowed}回（残り ${remaining}回）`;
+
+        const inputEl = document.getElementById("newAccountNameInput");
+        const submitBtn = document.getElementById("btnExecuteNameChange");
+        const quotaBox = document.getElementById("nameQuotaRequestBox");
+        const reasonInput = document.getElementById("nameQuotaReasonInput");
+        const reqBtn = document.getElementById("btnSubmitNameQuotaRequest");
+
+        inputEl.value = "";
+        reasonInput.value = "";
+        reqBtn.disabled = true;
+
+        if (remaining <= 0) {
+          inputEl.disabled = true;
+          submitBtn.disabled = true;
+          quotaBox.classList.remove("hidden");
+        } else {
+          inputEl.disabled = false;
+          submitBtn.disabled = false;
+          quotaBox.classList.add("hidden");
+        }
+
+        renderMyNameQuotaHistory(acc.id);
+        document.getElementById("nameChangeModal").classList.remove("hidden");
+      }
+
+      function handleNameChangeSubmit(e) {
+        e.preventDefault();
+        const acc = getCurrentAccount();
+        if (!acc || isAdminAccount(acc)) return;
+
+        const used = acc.nameChangeCount || 0;
+        const allowed = getAllowedNameChanges(acc);
+        if (used >= allowed) {
+          showToast("名前変更の上限に達しています。追加回数を申請してください。", "error");
+          return;
+        }
+
+        const check = validateAccountName(document.getElementById("newAccountNameInput").value);
+        if (!check.ok) {
+          showToast(check.message, "error");
+          return;
+        }
+
+        const accounts = ensureInitialAccounts();
+        if (accounts.some(a => a.id !== acc.id && a.name.toLowerCase() === check.value.toLowerCase())) {
+          showToast("そのアカウント名はすでに使われています。", "error");
+          return;
+        }
+
+        const target = accounts.find(a => a.id === acc.id);
+        const oldName = target.name;
+        target.name = check.value;
+        target.nameChangeCount = (target.nameChangeCount || 0) + 1;
+        target.updatedAt = Date.now();
+        saveJson(STORAGE_KEYS.accounts, accounts);
+
+        addActivityLog(check.value, "アカウント名変更", `「${oldName}」→「${check.value}」`);
+        scheduleAutoSync();
+        showToast(`アカウント名を「${check.value}」に変更しました。`, "success");
+        document.getElementById("nameChangeModal").classList.add("hidden");
+        renderHeaderAndHome();
+      }
+
+      function handleSubmitNameQuotaRequest() {
+        const acc = getCurrentAccount();
+        if (!acc) return;
+        const reason = document.getElementById("nameQuotaReasonInput").value.trim();
+        if (!reason) {
+          showToast("理由を入力してください。", "error");
+          return;
+        }
+
+        const list = loadJson(STORAGE_KEYS.nameQuotaRequests, []);
+        list.unshift({
+          id: "nqr_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          accountId: acc.id,
+          accountName: acc.name,
+          reason,
+          createdAt: Date.now(),
+          status: "pending",
+          adminReply: ""
+        });
+        saveJson(STORAGE_KEYS.nameQuotaRequests, list);
+        document.getElementById("nameQuotaReasonInput").value = "";
+        document.getElementById("btnSubmitNameQuotaRequest").disabled = true;
+        renderMyNameQuotaHistory(acc.id);
+        addActivityLog(acc.name, "名前変更回数追加申請", reason);
+        scheduleAutoSync();
+        showToast("名前変更回数の追加申請を送信しました。", "success");
+      }
+
+      function renderMyNameQuotaHistory(accountId) {
+        const container = document.getElementById("myNameQuotaHistoryList");
+        const list = loadJson(STORAGE_KEYS.nameQuotaRequests, []).filter(r => r.accountId === accountId);
+        if (list.length === 0) {
+          container.innerHTML = `<p class="text-slate-400">申請履歴はありません。</p>`;
+          return;
+        }
+        container.innerHTML = list.map(item => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800">${escapeHtml(item.reason)}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                item.status === "approved" ? "bg-emerald-100 text-emerald-800" :
+                item.status === "rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
+              }">${item.status === "approved" ? "承認済み" : item.status === "rejected" ? "却下" : "審査中"}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">${formatTime(item.createdAt)}</div>
+            ${item.adminReply ? `<div class="p-2 rounded-lg bg-blue-50 text-blue-950 font-semibold">管理者返信: ${escapeHtml(item.adminReply)}</div>` : ""}
+          </div>
+        `).join("");
+      }
+
+      function openPwRequestModal() {
+        const acc = getCurrentAccount();
+        if (!acc) return;
+        document.getElementById("pwRequestForm").reset();
+        renderMyPwRequestHistory(acc.id);
+        document.getElementById("pwRequestModal").classList.remove("hidden");
+      }
+
+      function handlePwRequestSubmit(e) {
+        e.preventDefault();
+        const acc = getCurrentAccount();
+        if (!acc) return;
+
+        const currentPin = normalizePin(document.getElementById("reqCurrentPinInput").value);
+        const newPin = normalizePin(document.getElementById("reqNewPinInput").value);
+
+        if (!currentPin || !newPin) {
+          showToast("現在のパスワードと変更後のパスワードはいずれも4桁の数字で入力してください。", "error");
+          return;
+        }
+        if (currentPin === newPin) {
+          showToast("現在のパスワードと異なる4桁の数字を指定してください。", "error");
+          return;
+        }
+
+        const requests = loadJson(STORAGE_KEYS.pwRequests, []);
+        requests.unshift({
+          id: "pwr_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          accountId: acc.id,
+          accountName: acc.name,
+          submittedCurrentPin: currentPin,
+          requestedNewPin: newPin,
+          createdAt: Date.now(),
+          status: "pending",
+          adminReply: ""
+        });
+        saveJson(STORAGE_KEYS.pwRequests, requests);
+        document.getElementById("pwRequestForm").reset();
+        renderMyPwRequestHistory(acc.id);
+        addActivityLog(acc.name, "パスワード変更依頼", "変更依頼を送信");
+        scheduleAutoSync();
+        showToast("パスワード変更依頼を管理者に送信しました。", "success");
+      }
+
+      function renderMyPwRequestHistory(accountId) {
+        const container = document.getElementById("myPwRequestHistoryList");
+        const list = loadJson(STORAGE_KEYS.pwRequests, []).filter(r => r.accountId === accountId);
+        if (list.length === 0) {
+          container.innerHTML = `<p class="text-slate-400">変更依頼の履歴はありません。</p>`;
+          return;
+        }
+        container.innerHTML = list.map(item => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800">変更希望PIN: ${escapeHtml(item.requestedNewPin)}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                item.status === "approved" ? "bg-emerald-100 text-emerald-800" :
+                item.status === "rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"
+              }">${item.status === "approved" ? "変更完了" : item.status === "rejected" ? "見送り・却下" : "確認待ち"}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">${formatTime(item.createdAt)}</div>
+            ${item.adminReply ? `<div class="p-2 rounded-lg bg-blue-50 text-blue-950 font-semibold">管理者返信: ${escapeHtml(item.adminReply)}</div>` : ""}
+          </div>
+        `).join("");
+      }
+
+      function openFeedbackModal() {
+        const acc = getCurrentAccount();
+        if (!acc) return;
+        const form = document.getElementById("feedbackForm");
+        const adminNotice = document.getElementById("adminFeedbackNoticeBox");
+        if (isAdminAccount(acc)) {
+          form.classList.add("hidden");
+          adminNotice.classList.remove("hidden");
+        } else {
+          form.classList.remove("hidden");
+          adminNotice.classList.add("hidden");
+        }
+        renderMyFeedbackHistory(acc.id);
+        document.getElementById("feedbackModal").classList.remove("hidden");
+      }
+
+      function handleFeedbackSubmit(e) {
+        e.preventDefault();
+        const acc = getCurrentAccount();
+        if (!acc || isAdminAccount(acc)) return;
+
+        const category = document.getElementById("feedbackCategorySelect").value;
+        const body = document.getElementById("feedbackBodyTextarea").value.trim();
+        if (!body) return;
+
+        const list = loadJson(STORAGE_KEYS.feedbacks, []);
+        list.unshift({
+          id: "fb_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          accountId: acc.id,
+          accountName: acc.name,
+          category,
+          body,
+          createdAt: Date.now(),
+          adminReply: "",
+          repliedAt: null
+        });
+        saveJson(STORAGE_KEYS.feedbacks, list);
+        document.getElementById("feedbackForm").reset();
+        renderMyFeedbackHistory(acc.id);
+        addActivityLog(acc.name, "意見・要望送信", `[${category}] ${body}`);
+        scheduleAutoSync();
+        showToast("運営へ意見・要望を送信しました。", "success");
+      }
+
+      function renderMyFeedbackHistory(accountId) {
+        const container = document.getElementById("myFeedbackHistoryList");
+        const list = loadJson(STORAGE_KEYS.feedbacks, []).filter(f => f.accountId === accountId);
+        if (list.length === 0) {
+          container.innerHTML = `<p class="text-slate-400">送信履歴はありません。</p>`;
+          return;
+        }
+        container.innerHTML = list.map(item => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-bold text-[11px]">${escapeHtml(item.category)}</span>
+              <span class="text-[11px] text-slate-400">${formatTime(item.createdAt)}</span>
+            </div>
+            <p class="text-slate-800 whitespace-pre-wrap">${escapeHtml(item.body)}</p>
+            ${item.adminReply
+              ? `<div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-950 font-semibold">管理者からの返信: ${escapeHtml(item.adminReply)}</div>`
+              : `<div class="text-[11px] text-slate-400">管理者返信待ち</div>`
+            }
+          </div>
+        `).join("");
+      }
+
+      // =========================================================================
+      // 8. テスト範囲お知らせ＆共有問題パック
+      // =========================================================================
+      function renderTestScopeAndPacks() {
+        const notices = loadJson(STORAGE_KEYS.testScopes, []);
+        const packs = loadJson(STORAGE_KEYS.sharedPacks, []);
+        const userData = appState.userData || createDefaultUserData();
+        const acc = getCurrentAccount();
+
+        const badge = document.getElementById("testScopeCountBadge");
+        badge.textContent = `お知らせ ${notices.length}件 / 共有パック ${packs.length}件`;
+
+        const noticesEl = document.getElementById("testScopeNoticesList");
+        if (notices.length === 0) {
+          noticesEl.innerHTML = `<p class="text-xs text-slate-400">現在掲載されているテスト範囲のお知らせはありません。</p>`;
+        } else {
+          noticesEl.innerHTML = notices.slice(0, 5).map(n => `
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded bg-[#162b49] text-white text-[11px] font-bold">${escapeHtml(n.subject)}</span>
+                <span class="font-extrabold text-slate-900">${escapeHtml(n.title)}</span>
+                <span class="text-[11px] text-slate-400 ml-auto">${formatTime(n.createdAt)}</span>
+              </div>
+              <p class="text-xs text-slate-700 whitespace-pre-wrap">${escapeHtml(n.body)}</p>
+            </div>
+          `).join("");
+        }
+
+        const packsEl = document.getElementById("sharedPacksContainer");
+        if (packs.length === 0 || !acc) {
+          packsEl.innerHTML = "";
+          return;
+        }
+
+        const pendingPacks = packs.filter(p =>
+          !userData.acceptedPackIds.includes(p.id) && !userData.dismissedPackIds.includes(p.id)
+        );
+        const acceptedPacks = packs.filter(p => userData.acceptedPackIds.includes(p.id));
+
+        let html = "";
+        if (pendingPacks.length > 0) {
+          html += pendingPacks.map(p => `
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-300 flex flex-wrap items-center justify-between gap-2">
+              <div class="text-xs">
+                <span class="px-2 py-0.5 rounded bg-amber-700 text-white font-bold mr-1.5">${escapeHtml(p.subject)}</span>
+                <strong class="text-slate-900">${escapeHtml(p.title)}</strong>
+                <span class="text-slate-600 ml-1">（${p.questions.length}問・テスト範囲共有パック）</span>
+              </div>
+              <div class="flex gap-1.5">
+                <button type="button" data-accept-pack="${escapeHtml(p.id)}" class="pack-accept-btn px-3 py-1 rounded-lg bg-[#162b49] text-white text-xs font-bold">
+                  問題集に取り込む
+                </button>
+                <button type="button" data-dismiss-pack="${escapeHtml(p.id)}" class="pack-dismiss-btn px-3 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 text-xs font-bold">
+                  見送る
+                </button>
+              </div>
+            </div>
+          `).join("");
+        }
+
+        if (acceptedPacks.length > 0) {
+          html += `<div class="text-[11px] font-bold text-emerald-800">取り込み済み共有パック: ${acceptedPacks.map(p => escapeHtml(p.title)).join("、 ")}</div>`;
+        }
+        packsEl.innerHTML = html;
+
+        packsEl.querySelectorAll(".pack-accept-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const packId = btn.getAttribute("data-accept-pack");
+            if (!userData.acceptedPackIds.includes(packId)) {
+              userData.acceptedPackIds.push(packId);
+              saveUserData(true);
+              renderAllScreens();
+              showToast("共有問題パックをあなたの問題集に取り込みました。", "success");
+            }
+          });
+        });
+
+        packsEl.querySelectorAll(".pack-dismiss-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const packId = btn.getAttribute("data-dismiss-pack");
+            if (!userData.dismissedPackIds.includes(packId)) {
+              userData.dismissedPackIds.push(packId);
+              saveUserData(true);
+              renderTestScopeAndPacks();
+            }
+          });
+        });
+      }
+
+      // =========================================================================
+      // 9. 問題生成・演習エンジン・スコア＆振り返り
+      // =========================================================================
+      function parseLineToQuestion(line, subject, defaultUnit = "自作・追加問題", level = 2) {
+        const cleaned = String(line || "").trim();
+        if (!cleaned) return null;
+
+        let left = "";
+        let right = "";
+        const sepMatch = cleaned.match(/^(.+?)\s*(?::|：|＝|=|－|—|->|→)\s*(.+)$/);
+        if (sepMatch) {
+          left = sepMatch[1].trim();
+          right = sepMatch[2].trim();
+        } else {
+          left = cleaned;
+          right = `${cleaned} の重要ポイント`;
+        }
+
+        const pool = getCombinedQuestionsForSubject(subject);
+        const candidates = pool
+          .map(q => q.answer)
+          .filter(ans => ans && ans !== right && ans !== left);
+
+        const distractors = [];
+        const fallbackChoices = [
+          "該当しない選択肢 A",
+          "該当しない選択肢 B",
+          "該当しない選択肢 C"
+        ];
+        for (const c of candidates) {
+          if (!distractors.includes(c)) distractors.push(c);
+          if (distractors.length >= 3) break;
+        }
+        for (const fb of fallbackChoices) {
+          if (distractors.length >= 3) break;
+          if (!distractors.includes(fb) && fb !== right) distractors.push(fb);
+        }
+
+        const isEnglishWord = subject === "英語" && /^[A-Za-z\s\-']+$/.test(left);
+        const prompt = isEnglishWord
+          ? `次の英単語・表現の意味として最も適切なものを選んでください：「${left}」`
+          : `「${left}」に関する正しい解答・説明はどれですか？`;
+
+        return {
+          id: "q_custom_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+          subject,
+          unit: defaultUnit || "自作・追加問題",
+          level,
+          type: "choice",
+          prompt,
+          answer: right,
+          choices: [right, ...distractors.slice(0, 3)],
+          hint1: `出題テーマ「${left}」の定義や意味を思い浮かべましょう。`,
+          hint2: `「${left}」と結びつく要点を確認してください。`,
+          explanation: `「${left}」の解答は「${right}」です。`,
+          source: "custom"
+        };
+      }
+
+      function addCustomQuestionsToCurrentUser(subject, newQuestions) {
+        if (!appState.currentAccountId || !appState.userData) {
+          showToast("問題を保存するにはログインしてください。", "error");
+          return 0;
+        }
+        if (!Array.isArray(appState.userData.customQuestions[subject])) {
+          appState.userData.customQuestions[subject] = [];
+        }
+        appState.userData.customQuestions[subject].push(...newQuestions);
+        saveUserData(true);
+        const acc = getCurrentAccount();
+        addActivityLog(acc?.name || "ユーザー", "個人問題追加", `${subject} に ${newQuestions.length}問 追加`);
+        renderSubjectWorkspace();
+        return newQuestions.length;
+      }
+
+      function handleQuickSingleAdd(e) {
+        e.preventDefault();
+        const pairText = document.getElementById("quickPairInput").value.trim();
+        const unitText = document.getElementById("quickUnitInput").value.trim() || "クイック追加";
+        if (!pairText) {
+          showToast("問題や「語句 : 意味」を入力してください。", "error");
+          return;
+        }
+        const q = parseLineToQuestion(pairText, appState.activeSubject, unitText, appState.userData.difficultyBySubject[appState.activeSubject] || 2);
+        if (!q) return;
+        addCustomQuestionsToCurrentUser(appState.activeSubject, [q]);
+        document.getElementById("quickPairInput").value = "";
+        showToast(`${appState.activeSubject} に1問追加しました。`, "success");
+      }
+
+      function handleBulkGenerate() {
+        const raw = document.getElementById("bulkMemoInput").value;
+        const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length === 0) {
+          showToast("一括生成するテキストを1行以上入力してください。", "error");
+          return;
+        }
+        const lv = appState.userData.difficultyBySubject[appState.activeSubject] || 2;
+        const created = lines.map((line, idx) => {
+          const q = parseLineToQuestion(line, appState.activeSubject, "メモ一括生成", lv);
+          if (idx % 3 === 2) q.type = "descriptive";
+          return q;
+        }).filter(Boolean);
+
+        addCustomQuestionsToCurrentUser(appState.activeSubject, created);
+        document.getElementById("bulkMemoInput").value = "";
+        showToast(`${created.length}問を一括生成して保存しました。`, "success");
+      }
+
+      function handleAutoGenerateBatch() {
+        const subject = appState.activeSubject;
+        const templates = SUBJECT_SEED_TEMPLATES[subject] || SUBJECT_SEED_TEMPLATES["数学I・A"];
+        const lv = appState.userData.difficultyBySubject[subject] || 2;
+        const batch = [];
+        for (let i = 0; i < 5; i++) {
+          const tpl = templates[i % templates.length];
+          const serial = Math.floor(Math.random() * 900) + 100;
+          batch.push({
+            id: "q_auto_" + Date.now() + "_" + i + "_" + Math.random().toString(36).slice(2, 5),
+            subject,
+            unit: `${tpl.unit}（自動量産）`,
+            level: lv,
+            type: i === 4 ? "descriptive" : "choice",
+            prompt: `[自動生成 #${serial}] ${tpl.prompt}`,
+            answer: tpl.answer,
+            choices: [tpl.answer, ...tpl.distractors].slice(0, 4),
+            hint1: tpl.hint1,
+            hint2: tpl.hint2,
+            explanation: tpl.explanation,
+            source: "auto"
+          });
+        }
+        addCustomQuestionsToCurrentUser(subject, batch);
+        showToast(`${subject} の問題を5問自動生成しました。`, "success");
+      }
+
+      async function runTesseractOcr(files, lang, statusEl, outputEl) {
+        if (!files || files.length === 0) {
+          showToast("画像ファイルを選択してください。", "error");
+          return;
+        }
+        if (typeof Tesseract === "undefined") {
+          showToast("OCRライブラリの読み込みが完了していません。", "error");
+          return;
+        }
+
+        const combinedLines = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          statusEl.textContent = `OCR解析中 (${i + 1}/${files.length}): ${file.name} ...`;
+          try {
+            const res = await Tesseract.recognize(file, lang, {
+              logger: m => {
+                if (m.status === "recognizing text" && typeof m.progress === "number") {
+                  statusEl.textContent = `OCR解析中 (${i + 1}/${files.length}): ${Math.round(m.progress * 100)}%`;
+                }
+              }
+            });
+            const txt = (res?.data?.text || "").trim();
+            if (txt) combinedLines.push(txt);
+          } catch (err) {
+            console.error("OCR error:", err);
+            statusEl.textContent = `一部画像の読み取りに失敗しました: ${file.name}`;
+          }
+        }
+        outputEl.value = combinedLines.join("\n");
+        statusEl.textContent = `OCR完了（${files.length}枚の画像を解析しました）`;
+      }
+
+      function shuffleArray(arr) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function startQuizSession(similarOnly = false) {
+        const subject = appState.activeSubject;
+        const userData = appState.userData || createDefaultUserData();
+        const course = appState.quizSession?.course || (document.getElementById("btnCourseDescriptive").classList.contains("bg-[#162b49]") ? "descriptive" : "choice");
+        const count = parseInt(document.getElementById("selectQuestionCount").value, 10) || 10;
+        const activeBtn = document.querySelector(".word-dir-btn.bg-\\[\\#162b49\\]");
+        const wordDir = activeBtn ? activeBtn.getAttribute("data-word-dir") : "both";
+        const enabledUnits = Array.isArray(userData.unitPrefs[subject]) ? userData.unitPrefs[subject] : [];
+
+        let pool = getCombinedQuestionsForSubject(subject);
+        if (enabledUnits.length > 0) {
+          const filtered = pool.filter(q => enabledUnits.includes(q.unit));
+          if (filtered.length > 0) pool = filtered;
+        }
+
+        if (similarOnly) {
+          const wrongIds = Array.isArray(userData.wrongQuestionIds) ? userData.wrongQuestionIds : [];
+          const wrongQuestions = pool.filter(q => wrongIds.includes(q.id));
+          if (wrongQuestions.length === 0) {
+            showToast("間違えた問題の履歴がまだありません。通常出題から挑戦しましょう。", "info");
+            return;
+          }
+          const expanded = [];
+          while (expanded.length < Math.min(count, Math.max(wrongQuestions.length * 2, 5))) {
+            const base = wrongQuestions[expanded.length % wrongQuestions.length];
+            expanded.push(Object.assign({}, base, {
+              id: base.id + "_sim_" + expanded.length,
+              originalId: base.id,
+              prompt: `[類題演習] ${base.prompt}`
+            }));
+          }
+          pool = expanded;
+        }
+
+        const picked = shuffleArray(pool).slice(0, Math.min(count, pool.length)).map(q => {
+          const item = Object.assign({}, q);
+          if (subject === "英語" && wordDir !== "both") {
+            const pairMatch = item.prompt.match(/「(.+?)」/);
+            if (pairMatch) {
+              if (wordDir === "to_word") {
+                item.prompt = `次の意味にあてはまる英語表現を選びなさい：「${item.answer}」`;
+                const wordChoices = [pairMatch[1], "study hard", "make progress", "pay attention"].filter((v, idx, self) => self.indexOf(v) === idx);
+                item.answer = pairMatch[1];
+                item.choices = shuffleArray(wordChoices).slice(0, 4);
+              }
+            }
+          }
+          item.shuffledChoices = Array.isArray(item.choices) && item.choices.length > 0
+            ? shuffleArray(item.choices)
+            : shuffleArray([item.answer, "選択肢A", "選択肢B", "選択肢C"]);
+          return item;
+        });
+
+        if (picked.length === 0) {
+          showToast("出題できる問題がありません。単元設定を確認してください。", "error");
+          return;
+        }
+
+        appState.lastQuizConfig = { subject, course, count, wordDir, similarOnly };
+        appState.quizSession = {
+          subject,
+          course,
+          similarOnly,
+          questions: picked,
+          currentIndex: 0,
+          correctCount: 0,
+          currentLevel: userData.difficultyBySubject[subject] || 2,
+          levelTrajectory: [userData.difficultyBySubject[subject] || 2],
+          answers: [],
+          hintStep: 0,
+          answeredCurrent: false
+        };
+
+        document.getElementById("quizSetupCard").classList.add("hidden");
+        document.getElementById("quizResultCard").classList.add("hidden");
+        document.getElementById("quizPlayCard").classList.remove("hidden");
+        renderCurrentQuestion();
+      }
+
+      function renderCurrentQuestion() {
+        const session = appState.quizSession;
+        if (!session) return;
+
+        const q = session.questions[session.currentIndex];
+        const total = session.questions.length;
+        session.hintStep = 0;
+        session.answeredCurrent = false;
+
+        document.getElementById("playProgressText").textContent = `第 ${session.currentIndex + 1} / ${total} 問`;
+        document.getElementById("playCourseBadge").textContent = session.course === "descriptive" ? "記述・文章題コース" : "4択コース";
+        document.getElementById("playUnitBadge").textContent = q.unit || "単元一般";
+        document.getElementById("playDiffBadge").textContent = `難易度 Lv.${session.currentLevel}`;
+        document.getElementById("playScoreBadge").textContent = `正解: ${session.correctCount}問`;
+        document.getElementById("playQuestionPrompt").textContent = q.prompt;
+
+        document.getElementById("hintBox").classList.add("hidden");
+        document.getElementById("hintBox").textContent = "";
+        document.getElementById("answerFeedbackBox").classList.add("hidden");
+        document.getElementById("btnNextQuestion").classList.add("hidden");
+
+        const choiceArea = document.getElementById("choiceArea");
+        const descArea = document.getElementById("descriptiveArea");
+
+        if (session.course === "descriptive") {
+          choiceArea.classList.add("hidden");
+          descArea.classList.remove("hidden");
+          const input = document.getElementById("descriptiveAnswerInput");
+          input.value = "";
+          input.disabled = false;
+          document.getElementById("btnSubmitDescriptive").disabled = false;
+        } else {
+          descArea.classList.add("hidden");
+          choiceArea.classList.remove("hidden");
+          choiceArea.innerHTML = q.shuffledChoices.map((choice, idx) => `
+            <button type="button" data-choice-index="${idx}" class="choice-btn">
+              <span class="font-extrabold text-[#162b49] mr-2">${["A", "B", "C", "D"][idx] || (idx + 1)}.</span>
+              <span>${escapeHtml(choice)}</span>
+            </button>
+          `).join("");
+
+          choiceArea.querySelectorAll(".choice-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const idx = parseInt(btn.getAttribute("data-choice-index"), 10);
+              evaluateAnswer(q.shuffledChoices[idx]);
+            });
+          });
+        }
+      }
+
+      function handleShowHint() {
+        const session = appState.quizSession;
+        if (!session) return;
+        const q = session.questions[session.currentIndex];
+        const hintBox = document.getElementById("hintBox");
+
+        session.hintStep += 1;
+        if (session.hintStep === 1) {
+          hintBox.textContent = `【ヒント 1】${q.hint1 || "問題文のキーワードを整理しましょう。"}`;
+        } else {
+          hintBox.textContent = `【ヒント 1】${q.hint1 || "問題文のキーワードを整理しましょう。"}\n【ヒント 2】${q.hint2 || "解答の要点を思い浮かべましょう。"}`;
+        }
+        hintBox.classList.remove("hidden");
+      }
+
+      function evaluateAnswer(userAnswerText) {
+        const session = appState.quizSession;
+        if (!session || session.answeredCurrent) return;
+        session.answeredCurrent = true;
+
+        const q = session.questions[session.currentIndex];
+        const trimmedUser = String(userAnswerText || "").trim();
+        const normalizedExpected = String(q.answer || "").trim();
+
+        let isCorrect = false;
+        if (session.course === "descriptive") {
+          const cleanUser = trimmedUser.toLowerCase().replace(/\s+/g, "");
+          const cleanAns = normalizedExpected.toLowerCase().replace(/\s+/g, "");
+          isCorrect = cleanUser.length > 0 && (cleanUser === cleanAns || (cleanAns.includes(cleanUser) && cleanUser.length >= 2) || cleanUser.includes(cleanAns));
+        } else {
+          isCorrect = trimmedUser === normalizedExpected;
+        }
+
+        if (isCorrect) {
+          session.correctCount += 1;
+          session.currentLevel = Math.min(3, session.currentLevel + 1);
+        } else {
+          session.currentLevel = Math.max(1, session.currentLevel - 1);
+        }
+        session.levelTrajectory.push(session.currentLevel);
+
+        const baseId = q.originalId || q.id;
+        const wrongSet = new Set(appState.userData.wrongQuestionIds || []);
+        if (!isCorrect) {
+          wrongSet.add(baseId);
+        } else {
+          wrongSet.delete(baseId);
+        }
+        appState.userData.wrongQuestionIds = Array.from(wrongSet);
+        appState.userData.difficultyBySubject[session.subject] = session.currentLevel;
+        saveUserData(false);
+
+        session.answers.push({
+          question: q,
+          userAnswer: trimmedUser || "(無回答)",
+          isCorrect
+        });
+
+        document.querySelectorAll(".choice-btn").forEach(btn => {
+          btn.disabled = true;
+        });
+        const descInput = document.getElementById("descriptiveAnswerInput");
+        if (descInput) descInput.disabled = true;
+        const descBtn = document.getElementById("btnSubmitDescriptive");
+        if (descBtn) descBtn.disabled = true;
+
+        const fbBox = document.getElementById("answerFeedbackBox");
+        const fbHeader = document.getElementById("feedbackResultHeader");
+        const fbAns = document.getElementById("feedbackCorrectAnswer");
+        const fbExp = document.getElementById("feedbackExplanation");
+
+        fbBox.className = "rounded-xl p-4 border text-xs sm:text-sm space-y-2 " + (
+          isCorrect
+            ? "bg-emerald-50 border-emerald-300 text-emerald-950"
+            : "bg-red-50 border-red-300 text-red-950"
+        );
+        fbHeader.textContent = isCorrect ? "正解！" : "不正解・復習ポイント";
+        fbAns.textContent = `解答: ${q.answer}`;
+        fbExp.textContent = q.explanation || "";
+        fbBox.classList.remove("hidden");
+
+        document.getElementById("playScoreBadge").textContent = `正解: ${session.correctCount}問`;
+        document.getElementById("playDiffBadge").textContent = `難易度 Lv.${session.currentLevel}`;
+
+        const nextBtn = document.getElementById("btnNextQuestion");
+        nextBtn.textContent = session.currentIndex + 1 >= session.questions.length ? "結果・スコアを見る →" : "次の問題へ →";
+        nextBtn.classList.remove("hidden");
+      }
+
+      function handleNextQuestion() {
+        const session = appState.quizSession;
+        if (!session) return;
+        if (session.currentIndex + 1 < session.questions.length) {
+          session.currentIndex += 1;
+          renderCurrentQuestion();
+        } else {
+          finishQuizSession();
+        }
+      }
+
+      function finishQuizSession() {
+        const session = appState.quizSession;
+        if (!session) return;
+
+        const total = session.questions.length;
+        const score = Math.round((session.correctCount / Math.max(1, total)) * 100);
+        const acc = getCurrentAccount();
+
+        appState.userData.history.unshift({
+          id: "hist_" + Date.now() + "_" + Math.random().toString(36).slice(2, 5),
+          time: Date.now(),
+          accountId: acc?.id || "",
+          accountName: acc?.name || "不明",
+          subject: session.subject,
+          course: session.course,
+          correctCount: session.correctCount,
+          total,
+          score
+        });
+        if (appState.userData.history.length > 100) {
+          appState.userData.history.length = 100;
+        }
+        saveUserData(true);
+
+        addActivityLog(acc?.name || "ユーザー", "演習完了", `${session.subject}: ${session.correctCount}/${total}問 (${score}点)`);
+
+        document.getElementById("quizPlayCard").classList.add("hidden");
+        document.getElementById("quizResultCard").classList.remove("hidden");
+
+        document.getElementById("resultSummaryMeta").textContent =
+          `${session.subject} ／ ${session.course === "descriptive" ? "記述・文章題コース" : "4択コース"} ／ 正解 ${session.correctCount} / ${total} 問`;
+        document.getElementById("resultScoreBig").textContent = `${score}点`;
+        document.getElementById("resultDiffTrajectory").textContent =
+          `難易度推移: ${session.levelTrajectory.map(lv => "Lv." + lv).join(" → ")}`;
+
+        const reviewList = document.getElementById("resultReviewList");
+        reviewList.innerHTML = session.answers.map((item, idx) => `
+          <div class="p-3.5 rounded-xl border ${item.isCorrect ? "bg-emerald-50/40 border-emerald-200" : "bg-red-50/40 border-red-200"} space-y-1.5 text-xs sm:text-sm">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-extrabold text-slate-900">Q${idx + 1}. ${escapeHtml(item.question.prompt)}</span>
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold ${item.isCorrect ? "bg-emerald-600 text-white" : "bg-red-600 text-white"}">
+                ${item.isCorrect ? "正解" : "要復習"}
+              </span>
+            </div>
+            <div class="text-xs font-bold text-slate-700">あなたの解答: ${escapeHtml(item.userAnswer)} ／ 正解: ${escapeHtml(item.question.answer)}</div>
+            <p class="text-xs text-slate-600 leading-relaxed">${escapeHtml(item.question.explanation || "")}</p>
+          </div>
+        `).join("");
+      }
+
+      // =========================================================================
+      // 10. 管理者コンソール（処罰・1日復旧・返信・共有・公式OCR・学習データ・同期）
+      // =========================================================================
+      function openAdminModal(initialTab = "accounts") {
+        const acc = getCurrentAccount();
+        if (!isAdminAccount(acc)) {
+          showToast("管理者アカウントでのみ開けます。", "error");
+          return;
+        }
+        switchAdminTab(initialTab);
+        renderAdminConsole();
+        document.getElementById("adminModal").classList.remove("hidden");
+        pullSnapshotFromCloud(true).then(() => {
+          if (!document.getElementById("adminModal").classList.contains("hidden")) {
+            renderAdminConsole();
+          }
+        });
+      }
+
+      function switchAdminTab(tabName) {
+        document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+          const active = btn.getAttribute("data-admin-tab") === tabName;
+          btn.className = "admin-tab-btn sub-pill " + (active ? "sub-pill-active" : "");
+        });
+        document.querySelectorAll(".admin-tab-panel").forEach(panel => {
+          panel.classList.toggle("hidden", panel.id !== "adminTab_" + tabName);
+        });
+      }
+
+      function collectAllLearningRecords() {
+        const accounts = ensureInitialAccounts();
+        const records = [];
+        for (const acc of accounts) {
+          const uData = loadUserData(acc.id);
+          const hist = Array.isArray(uData.history) ? uData.history : [];
+          for (const h of hist) {
+            const total = Math.max(1, Number(h.total) || 1);
+            const correct = Number(h.correctCount) || 0;
+            const rate = Math.round((correct / total) * 100);
+            records.push({
+              time: h.time || 0,
+              accountId: acc.id,
+              accountName: acc.name,
+              subject: h.subject || "-",
+              course: h.course === "descriptive" ? "記述・文章題" : "4択",
+              correctCount: correct,
+              total,
+              rate,
+              score: h.score ?? rate
+            });
+          }
+        }
+        records.sort((a, b) => (b.time || 0) - (a.time || 0));
+        return records;
+      }
+
+      function renderAdminLearningStats() {
+        const container = document.getElementById("adminLearningStatsList");
+        if (!container) return;
+        const records = collectAllLearningRecords();
+        if (records.length === 0) {
+          container.innerHTML = `<p class="text-slate-400">まだ演習履歴はありません。</p>`;
+          return;
+        }
+        container.innerHTML = records.slice(0, 50).map(r => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <strong class="text-slate-900">${escapeHtml(r.accountName)}</strong>
+              <span class="ml-2 px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-bold text-[11px]">${escapeHtml(r.subject)}</span>
+              <span class="ml-1 text-slate-600">${escapeHtml(r.course)}</span>
+              <span class="ml-2 font-bold text-[#162b49]">${r.score}点（${r.correctCount}/${r.total}問・正答率${r.rate}%）</span>
+            </div>
+            <span class="text-[11px] text-slate-400">${formatTime(r.time)}</span>
+          </div>
+        `).join("");
+      }
+
+      function exportLearningCsv() {
+        const records = collectAllLearningRecords();
+        const header = ["日時", "アカウント名", "教科", "コース", "正解数", "出題数", "正答率(%)", "スコア(点)"];
+        const rows = records.map(r => [
+          r.time ? new Date(r.time).toLocaleString("ja-JP") : "",
+          r.accountName,
+          r.subject,
+          r.course,
+          r.correctCount,
+          r.total,
+          r.rate,
+          r.score
+        ]);
+        const csvContent = [header, ...rows]
+          .map(row => row.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","))
+          .join("\n");
+        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `learning_records_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("全アカウントの学習データをCSVで書き出しました。", "success");
+      }
+
+      function renderAdminConsole() {
+        purgeExpiredDeletedAccounts();
+        const accounts = ensureInitialAccounts();
+        const deletedList = loadJson(STORAGE_KEYS.deletedAccounts, []);
+        const recoveryReqs = loadJson(STORAGE_KEYS.recoveryRequests, []);
+        const pwReqs = loadJson(STORAGE_KEYS.pwRequests, []);
+        const nameQuotaReqs = loadJson(STORAGE_KEYS.nameQuotaRequests, []);
+        const feedbacks = loadJson(STORAGE_KEYS.feedbacks, []);
+        const logs = loadJson(STORAGE_KEYS.activityLogs, []);
+        const scopes = loadJson(STORAGE_KEYS.testScopes, []);
+        const packs = loadJson(STORAGE_KEYS.sharedPacks, []);
+        const syncCfg = loadJson(STORAGE_KEYS.syncConfig, { roomKey: "", endpoint: "", autoSync: true });
+
+        document.getElementById("adminAccountOverview").textContent =
+          `登録アカウント: ${accounts.length}件 ／ 削除済み（24時間以内）: ${deletedList.length}件 ／ 未処理PW依頼: ${pwReqs.filter(r => r.status === "pending").length}件 ／ 未処理名前枠申請: ${nameQuotaReqs.filter(r => r.status === "pending").length}件 ／ 意見要望: ${feedbacks.length}件`;
+
+        // アカウント一覧＆処罰操作
+        const accListEl = document.getElementById("adminAccountsList");
+        accListEl.innerHTML = accounts.map(a => {
+          const isBuilt = Boolean(a.isBuiltinAdmin);
+          const p = a.punishment || { type: "none", until: 0, reason: "" };
+          const statusBadge = p.type === "frozen"
+            ? `<span class="px-2 py-0.5 rounded bg-red-100 text-red-800 font-extrabold text-[11px]">凍結中</span>`
+            : p.type === "suspended"
+            ? `<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-extrabold text-[11px]">利用停止中</span>`
+            : `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold text-[11px]">通常</span>`;
+
+          return `
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2.5 text-xs">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <strong class="text-sm text-slate-900">${escapeHtml(a.name)}</strong>
+                  <span class="ml-2 text-slate-500">PIN: ${escapeHtml(a.pin)}</span>
+                  <span class="ml-2 text-slate-500">名前変更: ${a.nameChangeCount || 0}/${getAllowedNameChanges(a)}回</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  ${statusBadge}
+                  <span class="text-slate-400">作成: ${formatTime(a.createdAt)}</span>
+                </div>
+              </div>
+              ${!isBuilt ? `
+                <div class="flex flex-wrap items-center gap-2">
+                  <button type="button" data-acc-id="${a.id}" data-punish="none" class="admin-punish-btn px-2.5 py-1 rounded-lg bg-white border border-slate-300 font-bold">処罰解除</button>
+                  <button type="button" data-acc-id="${a.id}" data-punish="suspended_24h" class="admin-punish-btn px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 font-bold">24時間利用停止</button>
+                  <button type="button" data-acc-id="${a.id}" data-punish="frozen" class="admin-punish-btn px-2.5 py-1 rounded-lg bg-red-100 text-red-900 font-bold">アカウント凍結</button>
+                  <button type="button" data-acc-id="${a.id}" data-grant-quota="1" class="admin-quota-btn px-2.5 py-1 rounded-lg bg-blue-100 text-blue-900 font-bold">+1回 名前変更枠付与</button>
+                  <button type="button" data-acc-id="${a.id}" class="admin-delete-acc-btn px-2.5 py-1 rounded-lg bg-slate-800 text-white font-bold ml-auto">削除（24h復旧可）</button>
+                </div>
+              ` : `<div class="text-[11px] text-slate-500">組み込み管理者アカウント（処罰・削除対象外）</div>`}
+            </div>
+          `;
+        }).join("");
+
+        accListEl.querySelectorAll(".admin-punish-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-acc-id");
+            const mode = btn.getAttribute("data-punish");
+            const list = ensureInitialAccounts();
+            const target = list.find(x => x.id === id);
+            if (!target) return;
+            if (mode === "none") {
+              target.punishment = { type: "none", until: 0, reason: "" };
+              target.lockoutUntil = 0;
+              target.failedAttempts = 0;
+            } else if (mode === "suspended_24h") {
+              target.punishment = { type: "suspended", until: Date.now() + 24 * 60 * 60 * 1000, reason: "管理者による24時間利用停止" };
+            } else if (mode === "frozen") {
+              target.punishment = { type: "frozen", until: 0, reason: "管理者による凍結" };
+            }
+            target.updatedAt = Date.now();
+            saveJson(STORAGE_KEYS.accounts, list);
+            addActivityLog(INITIAL_ADMIN_NAME, "処罰状態変更", `${target.name} -> ${mode}`);
+            scheduleAutoSync();
+            renderAdminConsole();
+          });
+        });
+
+        accListEl.querySelectorAll(".admin-quota-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-acc-id");
+            const list = ensureInitialAccounts();
+            const target = list.find(x => x.id === id);
+            if (!target) return;
+            target.extraNameQuota = (target.extraNameQuota || 0) + 1;
+            target.updatedAt = Date.now();
+            saveJson(STORAGE_KEYS.accounts, list);
+            addActivityLog(INITIAL_ADMIN_NAME, "名前変更枠付与", `${target.name} に +1回 付与`);
+            scheduleAutoSync();
+            renderAdminConsole();
+          });
+        });
+
+        accListEl.querySelectorAll(".admin-delete-acc-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-acc-id");
+            const list = ensureInitialAccounts();
+            const idx = list.findIndex(x => x.id === id);
+            if (idx === -1) return;
+            const [removed] = list.splice(idx, 1);
+            saveJson(STORAGE_KEYS.accounts, list);
+
+            const delList = loadJson(STORAGE_KEYS.deletedAccounts, []);
+            delList.unshift({
+              id: "del_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+              deletedAt: Date.now(),
+              deletedBy: "admin",
+              account: removed,
+              userData: loadUserData(removed.id)
+            });
+            saveJson(STORAGE_KEYS.deletedAccounts, delList);
+            addActivityLog(INITIAL_ADMIN_NAME, "管理者による削除", `${removed.name} を削除（24時間以内復旧可）`);
+            scheduleAutoSync();
+            renderAdminConsole();
+          });
+        });
+
+        // 復旧依頼一覧
+        const recReqEl = document.getElementById("adminRecoveryRequestsList");
+        if (recoveryReqs.length === 0) {
+          recReqEl.innerHTML = `<p class="text-slate-400">復旧依頼はありません。</p>`;
+        } else {
+          recReqEl.innerHTML = recoveryReqs.map(r => `
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <strong>${escapeHtml(r.accountName)}</strong>: ${escapeHtml(r.note)}
+                <span class="text-[11px] text-slate-400 ml-2">${formatTime(r.createdAt)}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded font-bold ${r.status === "recovered" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}">
+                ${r.status === "recovered" ? "復旧済み" : "依頼中"}
+              </span>
+            </div>
+          `).join("");
+        }
+
+        // 削除済みアカウント一覧（削除から1日以内のみ復旧可能）
+        const delListEl = document.getElementById("adminDeletedAccountsList");
+        if (deletedList.length === 0) {
+          delListEl.innerHTML = `<p class="text-slate-400">削除後24時間以内のアカウントはありません。</p>`;
+        } else {
+          delListEl.innerHTML = deletedList.map(entry => {
+            const remHours = getRemainingRecoveryHours(entry.deletedAt);
+            return `
+              <div class="p-3 rounded-xl bg-amber-50/60 border border-amber-200 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <strong class="text-slate-900">${escapeHtml(entry.account?.name || "")}</strong>
+                  <span class="text-slate-600 ml-2">削除日時: ${formatTime(entry.deletedAt)}</span>
+                  <span class="ml-2 px-2 py-0.5 rounded bg-amber-200/80 text-amber-950 font-bold">復旧可能残り約${remHours}時間</span>
+                </div>
+                <button type="button" data-del-id="${entry.id}" class="admin-recover-btn px-3 py-1 rounded-lg bg-[#162b49] text-white font-bold">
+                  アカウントを復旧する
+                </button>
+              </div>
+            `;
+          }).join("");
+
+          delListEl.querySelectorAll(".admin-recover-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const delId = btn.getAttribute("data-del-id");
+              const currentDel = loadJson(STORAGE_KEYS.deletedAccounts, []);
+              const idx = currentDel.findIndex(d => d.id === delId);
+              if (idx === -1) return;
+
+              const targetEntry = currentDel[idx];
+              if (Date.now() - (targetEntry.deletedAt || 0) > RECOVERY_WINDOW_MS) {
+                showToast("削除から24時間（1日）を経過しているため復旧できません。", "error");
+                purgeExpiredDeletedAccounts();
+                renderAdminConsole();
+                return;
+              }
+
+              const accs = ensureInitialAccounts();
+              if (!accs.some(a => a.id === targetEntry.account.id || a.name.toLowerCase() === targetEntry.account.name.toLowerCase())) {
+                targetEntry.account.updatedAt = Date.now();
+                accs.push(targetEntry.account);
+                saveJson(STORAGE_KEYS.accounts, accs);
+              }
+              if (targetEntry.userData) {
+                saveJson(STORAGE_KEYS.userDataPrefix + targetEntry.account.id, targetEntry.userData);
+              }
+
+              currentDel.splice(idx, 1);
+              saveJson(STORAGE_KEYS.deletedAccounts, currentDel);
+
+              const rList = loadJson(STORAGE_KEYS.recoveryRequests, []);
+              rList.forEach(req => {
+                if (req.accountName.toLowerCase() === targetEntry.account.name.toLowerCase() && req.status === "pending") {
+                  req.status = "recovered";
+                  req.adminReply = "管理者がアカウントを復旧しました。";
+                }
+              });
+              saveJson(STORAGE_KEYS.recoveryRequests, rList);
+
+              addActivityLog(INITIAL_ADMIN_NAME, "アカウント復旧", `${targetEntry.account.name} を復旧しました`);
+              scheduleAutoSync();
+              showToast(`「${targetEntry.account.name}」を復旧しました。`, "success");
+              renderAdminConsole();
+            });
+          });
+        }
+
+        // 活動ログ
+        const logsEl = document.getElementById("adminActivityLogsList");
+        logsEl.innerHTML = logs.slice(0, 30).map(l => `
+          <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between gap-2">
+            <div><strong class="text-slate-800">${escapeHtml(l.actor)}</strong>: ${escapeHtml(l.action)} ${l.detail ? `<span class="text-slate-500">(${escapeHtml(l.detail)})</span>` : ""}</div>
+            <span class="text-[11px] text-slate-400 shrink-0">${formatTime(l.time)}</span>
+          </div>
+        `).join("");
+
+        // パスワード変更依頼一覧（現在PW照合＋返信）
+        const pwListEl = document.getElementById("adminPwRequestsList");
+        if (pwReqs.length === 0) {
+          pwListEl.innerHTML = `<p class="text-xs text-slate-400">パスワード変更依頼はありません。</p>`;
+        } else {
+          pwListEl.innerHTML = pwReqs.map(req => `
+            <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <strong class="text-slate-900">${escapeHtml(req.accountName)}</strong>
+                  <span class="ml-2 text-slate-600">申請された現PIN: <code class="font-bold">${escapeHtml(req.submittedCurrentPin)}</code> → 希望新PIN: <code class="font-bold">${escapeHtml(req.requestedNewPin)}</code></span>
+                </div>
+                <span class="px-2 py-0.5 rounded font-bold ${req.status === "approved" ? "bg-emerald-100 text-emerald-800" : req.status === "rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}">
+                  ${req.status === "approved" ? "承認済み" : req.status === "rejected" ? "却下" : "確認待ち"}
+                </span>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <input type="text" data-pw-verify="${req.id}" maxlength="4" placeholder="現在のPIN再入力で照合"
+                  class="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs w-36" />
+                <input type="text" data-pw-reply="${req.id}" value="${escapeHtml(req.adminReply || "")}" placeholder="ユーザーへの返信メッセージ"
+                  class="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs flex-1 min-w-[180px]" />
+                <button type="button" data-pw-approve="${req.id}" class="px-3 py-1 rounded-lg bg-[#162b49] text-white font-bold">照合して変更・返信</button>
+                <button type="button" data-pw-reject="${req.id}" class="px-3 py-1 rounded-lg bg-slate-200 text-slate-800 font-bold">却下・返信</button>
+              </div>
+            </div>
+          `).join("");
+
+          pwListEl.querySelectorAll("[data-pw-approve]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const id = btn.getAttribute("data-pw-approve");
+              const verifyInput = pwListEl.querySelector(`[data-pw-verify="${id}"]`);
+              const replyInput = pwListEl.querySelector(`[data-pw-reply="${id}"]`);
+              const verifiedPin = normalizePin(verifyInput?.value || "");
+
+              const allReqs = loadJson(STORAGE_KEYS.pwRequests, []);
+              const targetReq = allReqs.find(r => r.id === id);
+              if (!targetReq) return;
+
+              const accs = ensureInitialAccounts();
+              const targetAcc = accs.find(a => a.id === targetReq.accountId);
+              if (!targetAcc) {
+                showToast("対象アカウントが見つかりません。", "error");
+                return;
+              }
+
+              if (!verifiedPin || verifiedPin !== targetAcc.pin || verifiedPin !== targetReq.submittedCurrentPin) {
+                showToast("現在のパスワード照合が一致しません。変更は実行されませんでした。", "error");
+                return;
+              }
+
+              targetAcc.pin = targetReq.requestedNewPin;
+              targetAcc.updatedAt = Date.now();
+              saveJson(STORAGE_KEYS.accounts, accs);
+
+              targetReq.status = "approved";
+              targetReq.adminReply = (replyInput?.value || "").trim() || "現在のパスワード一致を確認し、新しいパスワードへ変更しました。";
+              saveJson(STORAGE_KEYS.pwRequests, allReqs);
+
+              addActivityLog(INITIAL_ADMIN_NAME, "PW変更承認", `${targetAcc.name} のパスワードを変更`);
+              scheduleAutoSync();
+              showToast(`${targetAcc.name} のパスワードを変更しました。`, "success");
+              renderAdminConsole();
+            });
+          });
+
+          pwListEl.querySelectorAll("[data-pw-reject]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const id = btn.getAttribute("data-pw-reject");
+              const replyInput = pwListEl.querySelector(`[data-pw-reply="${id}"]`);
+              const allReqs = loadJson(STORAGE_KEYS.pwRequests, []);
+              const targetReq = allReqs.find(r => r.id === id);
+              if (!targetReq) return;
+              targetReq.status = "rejected";
+              targetReq.adminReply = (replyInput?.value || "").trim() || "入力内容を確認できませんでした。";
+              saveJson(STORAGE_KEYS.pwRequests, allReqs);
+              scheduleAutoSync();
+              renderAdminConsole();
+            });
+          });
+        }
+
+        // 名前変更回数追加申請一覧（承認/却下＋返信）
+        const nqListEl = document.getElementById("adminNameQuotaRequestsList");
+        if (nameQuotaReqs.length === 0) {
+          nqListEl.innerHTML = `<p class="text-xs text-slate-400">名前変更回数の追加申請はありません。</p>`;
+        } else {
+          nqListEl.innerHTML = nameQuotaReqs.map(req => `
+            <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-2 text-xs">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <strong class="text-slate-900">${escapeHtml(req.accountName)}</strong>
+                  <span class="ml-2 text-slate-700">理由: ${escapeHtml(req.reason)}</span>
+                </div>
+                <span class="px-2 py-0.5 rounded font-bold ${req.status === "approved" ? "bg-emerald-100 text-emerald-800" : req.status === "rejected" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}">
+                  ${req.status === "approved" ? "承認済み" : req.status === "rejected" ? "却下" : "審査中"}
+                </span>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <input type="text" data-nq-reply="${req.id}" value="${escapeHtml(req.adminReply || "")}" placeholder="返信メッセージを入力"
+                  class="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs flex-1 min-w-[180px]" />
+                <button type="button" data-nq-approve="${req.id}" class="px-3 py-1 rounded-lg bg-[#162b49] text-white font-bold">+1回付与して返信</button>
+                <button type="button" data-nq-reject="${req.id}" class="px-3 py-1 rounded-lg bg-slate-200 text-slate-800 font-bold">却下・返信</button>
+              </div>
+            </div>
+          `).join("");
+
+          nqListEl.querySelectorAll("[data-nq-approve]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const id = btn.getAttribute("data-nq-approve");
+              const replyInput = nqListEl.querySelector(`[data-nq-reply="${id}"]`);
+              const list = loadJson(STORAGE_KEYS.nameQuotaRequests, []);
+              const item = list.find(x => x.id === id);
+              if (!item) return;
+
+              const accs = ensureInitialAccounts();
+              const accObj = accs.find(a => a.id === item.accountId);
+              if (accObj) {
+                accObj.extraNameQuota = (accObj.extraNameQuota || 0) + 1;
+                accObj.updatedAt = Date.now();
+                saveJson(STORAGE_KEYS.accounts, accs);
+              }
+              item.status = "approved";
+              item.adminReply = (replyInput?.value || "").trim() || "名前変更回数を1回追加しました。";
+              saveJson(STORAGE_KEYS.nameQuotaRequests, list);
+              addActivityLog(INITIAL_ADMIN_NAME, "名前変更枠承認", `${item.accountName} に +1回 付与`);
+              scheduleAutoSync();
+              renderAdminConsole();
+            });
+          });
+
+          nqListEl.querySelectorAll("[data-nq-reject]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const id = btn.getAttribute("data-nq-reject");
+              const replyInput = nqListEl.querySelector(`[data-nq-reply="${id}"]`);
+              const list = loadJson(STORAGE_KEYS.nameQuotaRequests, []);
+              const item = list.find(x => x.id === id);
+              if (!item) return;
+              item.status = "rejected";
+              item.adminReply = (replyInput?.value || "").trim() || "今回の追加申請は見送らせていただきました。";
+              saveJson(STORAGE_KEYS.nameQuotaRequests, list);
+              scheduleAutoSync();
+              renderAdminConsole();
+            });
+          });
+        }
+
+        // 掲載中のテスト範囲・共有パック
+        const pubScopesEl = document.getElementById("adminPublishedScopesList");
+        pubScopesEl.innerHTML = `
+          <div class="font-extrabold text-slate-800">配信中のテスト範囲お知らせ (${scopes.length}件) / 共有問題パック (${packs.length}件)</div>
+          ${scopes.map(s => `<div class="p-2 rounded-lg bg-slate-50 border border-slate-200">[${escapeHtml(s.subject)}] <strong>${escapeHtml(s.title)}</strong>: ${escapeHtml(s.body)}</div>`).join("")}
+          ${packs.map(p => `<div class="p-2 rounded-lg bg-amber-50 border border-amber-200">[共有パック・${escapeHtml(p.subject)}] <strong>${escapeHtml(p.title)}</strong>（${p.questions.length}問）</div>`).join("")}
+        `;
+
+        // 意見・要望受信箱（管理者返信対応）
+        const fbInboxEl = document.getElementById("adminFeedbackInboxList");
+        if (feedbacks.length === 0) {
+          fbInboxEl.innerHTML = `<p class="text-slate-400">意見・要望はまだありません。</p>`;
+        } else {
+          fbInboxEl.innerHTML = feedbacks.map(fb => `
+            <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+              <div class="flex items-center justify-between">
+                <div>
+                  <strong class="text-slate-900">${escapeHtml(fb.accountName)}</strong>
+                  <span class="ml-2 px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-bold text-[11px]">${escapeHtml(fb.category)}</span>
+                </div>
+                <span class="text-[11px] text-slate-400">${formatTime(fb.createdAt)}</span>
+              </div>
+              <p class="text-slate-800 whitespace-pre-wrap">${escapeHtml(fb.body)}</p>
+              <div class="flex flex-wrap items-center gap-2">
+                <input type="text" data-fb-reply-input="${fb.id}" value="${escapeHtml(fb.adminReply || "")}" placeholder="返信内容を入力..."
+                  class="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs flex-1 min-w-[200px]" />
+                <button type="button" data-fb-reply-btn="${fb.id}" class="px-3 py-1 rounded-lg bg-[#162b49] text-white font-bold">返信を保存</button>
+              </div>
+            </div>
+          `).join("");
+
+          fbInboxEl.querySelectorAll("[data-fb-reply-btn]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const id = btn.getAttribute("data-fb-reply-btn");
+              const input = fbInboxEl.querySelector(`[data-fb-reply-input="${id}"]`);
+              const replyText = (input?.value || "").trim();
+              const allFb = loadJson(STORAGE_KEYS.feedbacks, []);
+              const target = allFb.find(x => x.id === id);
+              if (!target) return;
+              target.adminReply = replyText;
+              target.repliedAt = Date.now();
+              saveJson(STORAGE_KEYS.feedbacks, allFb);
+              addActivityLog(INITIAL_ADMIN_NAME, "意見・要望へ返信", `${target.accountName} 宛てに返信保存`);
+              scheduleAutoSync();
+              showToast(`${target.accountName} への返信を保存しました。`, "success");
+              renderAdminConsole();
+            });
+          });
+        }
+
+        // 別デバイス同期設定フォーム初期値＆学習データ一覧
+        document.getElementById("syncRoomKeyInput").value = syncCfg.roomKey || "";
+        document.getElementById("syncEndpointInput").value = syncCfg.endpoint || "";
+        document.getElementById("syncAutoToggle").checked = syncCfg.autoSync !== false;
+        renderAdminLearningStats();
+      }
+
+      // =========================================================================
+      // 11. 別デバイス連携・クラウド同期・マージ処理・JSONスナップショット
+      // =========================================================================
+      function mergeById(localArr, remoteArr, preferRemote = false) {
+        const map = new Map();
+        const first = preferRemote ? (localArr || []) : (remoteArr || []);
+        const second = preferRemote ? (remoteArr || []) : (localArr || []);
+        for (const item of first) {
+          if (item && item.id) map.set(item.id, item);
+        }
+        for (const item of second) {
+          if (!item || !item.id) continue;
+          const prev = map.get(item.id);
+          if (!prev) {
+            map.set(item.id, item);
+          } else {
+            const tPrev = prev.updatedAt || prev.repliedAt || prev.createdAt || 0;
+            const tCurr = item.updatedAt || item.repliedAt || item.createdAt || 0;
+            map.set(item.id, tCurr >= tPrev ? Object.assign({}, prev, item) : Object.assign({}, item, prev));
+          }
+        }
+        return Array.from(map.values());
+      }
+
+      function mergeAccountsList(localAccs, remoteAccs) {
+        const map = new Map();
+        for (const acc of (localAccs || [])) {
+          if (acc && acc.id) map.set(acc.id, acc);
+        }
+        for (const rAcc of (remoteAccs || [])) {
+          if (!rAcc || !rAcc.id) continue;
+          const lAcc = map.get(rAcc.id);
+          if (!lAcc) {
+            const sameName = Array.from(map.values()).find(x => x.name && rAcc.name && x.name.toLowerCase() === rAcc.name.toLowerCase());
+            if (!sameName) {
+              map.set(rAcc.id, rAcc);
+            }
+          } else {
+            const tLocal = lAcc.updatedAt || lAcc.createdAt || 0;
+            const tRemote = rAcc.updatedAt || rAcc.createdAt || 0;
+            map.set(rAcc.id, tRemote > tLocal ? Object.assign({}, lAcc, rAcc) : Object.assign({}, rAcc, lAcc));
+          }
+        }
+        return Array.from(map.values());
+      }
+
+      function mergeUserDataObject(localU, remoteU) {
+        const base = createDefaultUserData();
+        const a = Object.assign({}, base, localU || {});
+        const b = Object.assign({}, base, remoteU || {});
+
+        const mergedCustom = {};
+        for (const sub of SUBJECTS) {
+          const listA = Array.isArray(a.customQuestions?.[sub]) ? a.customQuestions[sub] : [];
+          const listB = Array.isArray(b.customQuestions?.[sub]) ? b.customQuestions[sub] : [];
+          mergedCustom[sub] = mergeById(listA, listB, true);
+        }
+
+        const mergedHist = mergeById(a.history || [], b.history || [], true)
+          .sort((x, y) => (y.time || 0) - (x.time || 0))
+          .slice(0, 100);
+
+        const mergedWrong = Array.from(new Set([...(a.wrongQuestionIds || []), ...(b.wrongQuestionIds || [])]));
+        const mergedAccepted = Array.from(new Set([...(a.acceptedPackIds || []), ...(b.acceptedPackIds || [])]));
+        const mergedDismissed = Array.from(new Set([...(a.dismissedPackIds || []), ...(b.dismissedPackIds || [])]));
+
+        const newerIsRemote = (b.updatedAt || 0) > (a.updatedAt || 0);
+        return {
+          customQuestions: mergedCustom,
+          acceptedPackIds: mergedAccepted,
+          dismissedPackIds: mergedDismissed,
+          difficultyBySubject: newerIsRemote ? Object.assign({}, a.difficultyBySubject, b.difficultyBySubject) : Object.assign({}, b.difficultyBySubject, a.difficultyBySubject),
+          unitPrefs: newerIsRemote ? Object.assign({}, a.unitPrefs, b.unitPrefs) : Object.assign({}, b.unitPrefs, a.unitPrefs),
+          history: mergedHist,
+          wrongQuestionIds: mergedWrong,
+          updatedAt: Math.max(a.updatedAt || 0, b.updatedAt || 0, Date.now())
+        };
+      }
+
+      function buildFullSnapshot() {
+        const accounts = ensureInitialAccounts();
+        const userDatas = {};
+        for (const acc of accounts) {
+          userDatas[acc.id] = loadUserData(acc.id);
+        }
+        return {
+          version: "5.2",
+          exportedAt: Date.now(),
+          accounts,
+          deletedAccounts: loadJson(STORAGE_KEYS.deletedAccounts, []),
+          recoveryRequests: loadJson(STORAGE_KEYS.recoveryRequests, []),
+          officialQuestions: ensureOfficialQuestionsSeed(),
+          userDatas,
+          activityLogs: loadJson(STORAGE_KEYS.activityLogs, []),
+          feedbacks: loadJson(STORAGE_KEYS.feedbacks, []),
+          pwRequests: loadJson(STORAGE_KEYS.pwRequests, []),
+          nameQuotaRequests: loadJson(STORAGE_KEYS.nameQuotaRequests, []),
+          testScopes: loadJson(STORAGE_KEYS.testScopes, []),
+          sharedPacks: loadJson(STORAGE_KEYS.sharedPacks, [])
+        };
+      }
+
+      function applySnapshotObject(snap, mergeMode = true) {
+        if (!snap || typeof snap !== "object") {
+          throw new Error("不正なスナップショット形式です。");
+        }
+
+        const localAccs = ensureInitialAccounts();
+        const mergedAccs = mergeMode ? mergeAccountsList(localAccs, snap.accounts || []) : (Array.isArray(snap.accounts) && snap.accounts.length > 0 ? snap.accounts : localAccs);
+        saveJson(STORAGE_KEYS.accounts, mergedAccs);
+
+        const mergedDeleted = mergeMode
+          ? mergeById(loadJson(STORAGE_KEYS.deletedAccounts, []), snap.deletedAccounts || [], true)
+          : (Array.isArray(snap.deletedAccounts) ? snap.deletedAccounts : []);
+        saveJson(STORAGE_KEYS.deletedAccounts, mergedDeleted);
+
+        const mergedRec = mergeMode
+          ? mergeById(loadJson(STORAGE_KEYS.recoveryRequests, []), snap.recoveryRequests || [], true).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+          : (Array.isArray(snap.recoveryRequests) ? snap.recoveryRequests : []);
+        saveJson(STORAGE_KEYS.recoveryRequests, mergedRec);
+
+        if (snap.officialQuestions && typeof snap.officialQuestions === "object") {
+          const curOfficial = ensureOfficialQuestionsSeed();
+          const nextOfficial = {};
+          for (const sub of SUBJECTS) {
+            nextOfficial[sub] = mergeMode
+              ? mergeById(curOfficial[sub] || [], snap.officialQuestions[sub] || [], true)
+              : (Array.isArray(snap.officialQuestions[sub]) ? snap.officialQuestions[sub] : (curOfficial[sub] || []));
+          }
+          saveJson(STORAGE_KEYS.officialQuestions, nextOfficial);
+        }
+
+        if (snap.userDatas && typeof snap.userDatas === "object") {
+          for (const [accId, rUData] of Object.entries(snap.userDatas)) {
+            const lUData = loadUserData(accId);
+            const nextUData = mergeMode ? mergeUserDataObject(lUData, rUData) : rUData;
+            saveJson(STORAGE_KEYS.userDataPrefix + accId, nextUData);
+          }
+        }
+
+        if (Array.isArray(snap.activityLogs)) {
+          const nextLogs = mergeMode
+            ? mergeById(loadJson(STORAGE_KEYS.activityLogs, []), snap.activityLogs, true).sort((a, b) => (b.time || 0) - (a.time || 0)).slice(0, 250)
+            : snap.activityLogs;
+          saveJson(STORAGE_KEYS.activityLogs, nextLogs);
+        }
+
+        if (Array.isArray(snap.feedbacks)) {
+          const nextFb = mergeMode
+            ? mergeById(loadJson(STORAGE_KEYS.feedbacks, []), snap.feedbacks, true).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            : snap.feedbacks;
+          saveJson(STORAGE_KEYS.feedbacks, nextFb);
+        }
+
+        if (Array.isArray(snap.pwRequests)) {
+          const nextPw = mergeMode
+            ? mergeById(loadJson(STORAGE_KEYS.pwRequests, []), snap.pwRequests, true).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            : snap.pwRequests;
+          saveJson(STORAGE_KEYS.pwRequests, nextPw);
+        }
+
+        if (Array.isArray(snap.nameQuotaRequests)) {
+          const nextNq = mergeMode
+            ? mergeById(loadJson(STORAGE_KEYS.nameQuotaRequests, []), snap.nameQuotaRequests, true).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            : snap.nameQuotaRequests;
+          saveJson(STORAGE_KEYS.nameQuotaRequests, nextNq);
+        }
+
+        if (Array.isArray(snap.testScopes)) {
+          const nextScopes = mergeMode
+            ? mergeById(loadJson(STORAGE_KEYS.testScopes, []), snap.testScopes, true).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            : snap.testScopes;
+          saveJson(STORAGE_KEYS.testScopes, nextScopes);
+        }
+
+        if (Array.isArray(snap.sharedPacks)) {
+          const nextPacks = mergeMode
+            ? mergeById(loadJson(STORAGE_KEYS.sharedPacks, []), snap.sharedPacks, true).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            : snap.sharedPacks;
+          saveJson(STORAGE_KEYS.sharedPacks, nextPacks);
+        }
+
+        purgeExpiredDeletedAccounts();
+        ensureInitialAccounts();
+        if (appState.currentAccountId) {
+          appState.userData = loadUserData(appState.currentAccountId);
+        }
+        renderAllScreens();
+        if (!document.getElementById("adminModal").classList.contains("hidden")) {
+          renderAdminConsole();
+        }
+      }
+
+      function buildCloudUrl(endpoint, roomKey) {
+        const cleanBase = String(endpoint || "").trim().replace(/\/+$/, "");
+        const cleanRoom = encodeURIComponent(String(roomKey || "default_room").trim() || "default_room");
+        if (!cleanBase) return "";
+        return `${cleanBase}/testprep_v52/${cleanRoom}.json`;
+      }
+
+      let autoSyncTimer = null;
+      function scheduleAutoSync() {
+        const cfg = loadJson(STORAGE_KEYS.syncConfig, { roomKey: "", endpoint: "", autoSync: true });
+        if (!cfg.endpoint || cfg.autoSync === false) return;
+        if (autoSyncTimer) clearTimeout(autoSyncTimer);
+        autoSyncTimer = setTimeout(() => {
+          pushSnapshotToCloud(true);
+        }, 500);
+      }
+
+      async function pushSnapshotToCloud(silent = false) {
+        if (appState.isSyncing) return;
+        const cfg = loadJson(STORAGE_KEYS.syncConfig, { roomKey: "", endpoint: "", autoSync: true });
+        const statusEl = document.getElementById("syncStatusText");
+        const url = buildCloudUrl(cfg.endpoint, cfg.roomKey);
+        if (!url) {
+          if (!silent && statusEl) statusEl.textContent = "クラウド同期URLが未設定のため、ローカル保存のみが有効です。";
+          if (!silent) showToast("クラウド同期URLを入力して保存してください。", "info");
+          return;
+        }
+        appState.isSyncing = true;
+        try {
+          if (!silent && statusEl) statusEl.textContent = "クラウドへ送信中...";
+          // 送信前にクラウド側最新とマージしてから送ることで友達の端末データも保持
+          const getRes = await fetch(url, { method: "GET" });
+          if (getRes.ok) {
+            const remoteData = await getRes.json();
+            if (remoteData && typeof remoteData === "object" && Array.isArray(remoteData.accounts)) {
+              applySnapshotObject(remoteData, true);
+            }
+          }
+          const snap = buildFullSnapshot();
+          const res = await fetch(url, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(snap)
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (statusEl) statusEl.textContent = `クラウド同期完了（${formatTime(Date.now())}）`;
+          if (!silent) showToast("別デバイス同期用データをクラウドへ送信しました。", "success");
+        } catch (err) {
+          console.error("Cloud push error:", err);
+          if (statusEl) statusEl.textContent = `クラウド送信に失敗しました: ${err.message}`;
+          if (!silent) showToast("クラウド送信に失敗しました。URLとネットワーク設定を確認してください。", "error");
+        } finally {
+          appState.isSyncing = false;
+        }
+      }
+
+      async function pullSnapshotFromCloud(silent = false) {
+        if (appState.isSyncing) return;
+        const cfg = loadJson(STORAGE_KEYS.syncConfig, { roomKey: "", endpoint: "", autoSync: true });
+        const statusEl = document.getElementById("syncStatusText");
+        const url = buildCloudUrl(cfg.endpoint, cfg.roomKey);
+        if (!url) {
+          if (!silent && statusEl) statusEl.textContent = "クラウド同期URLが未設定です。";
+          return;
+        }
+        appState.isSyncing = true;
+        try {
+          if (!silent && statusEl) statusEl.textContent = "クラウドから最新データを取得中...";
+          const res = await fetch(url, { method: "GET" });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data && typeof data === "object" && Array.isArray(data.accounts)) {
+            applySnapshotObject(data, true);
+            if (statusEl) statusEl.textContent = `クラウドから最新データを反映しました（${formatTime(Date.now())}）`;
+            if (!silent) showToast("クラウドから最新データを取得・反映しました。", "success");
+          } else if (!silent && statusEl) {
+            statusEl.textContent = "クラウド上にまだ同期データがありません。";
+          }
+        } catch (err) {
+          console.error("Cloud pull error:", err);
+          if (!silent && statusEl) statusEl.textContent = `クラウド取得エラー: ${err.message}`;
+          if (!silent) showToast("クラウドからの取得に失敗しました。", "error");
+        } finally {
+          appState.isSyncing = false;
+        }
+      }
+
+      // =========================================================================
+      // 12. 画面描画関数
+      // =========================================================================
+      function renderHeaderAndHome() {
+        const acc = getCurrentAccount();
+        const headerControls = document.getElementById("headerUserControls");
+        const headerSubBar = document.getElementById("headerSubjectBar");
+        const entryScreen = document.getElementById("entryScreen");
+        const studyHomeScreen = document.getElementById("studyHomeScreen");
+        const subjectWorkspace = document.getElementById("subjectWorkspace");
+
+        if (!acc) {
+          headerControls.classList.add("hidden");
+          headerSubBar.classList.add("hidden");
+          studyHomeScreen.classList.add("hidden");
+          subjectWorkspace.classList.add("hidden");
+          entryScreen.classList.remove("hidden");
+          return;
+        }
+
+        entryScreen.classList.add("hidden");
+        headerControls.classList.remove("hidden");
+        headerControls.classList.add("flex");
+        headerSubBar.classList.remove("hidden");
+        headerSubBar.classList.add("flex");
+
+        const adminFlag = isAdminAccount(acc);
+        const cfg = loadJson(STORAGE_KEYS.syncConfig, { roomKey: "", endpoint: "", autoSync: true });
+        document.getElementById("headerSyncBadge").textContent = cfg.endpoint ? `クラウド同期: ${cfg.roomKey || "有効"}` : "ローカル保存";
+        document.getElementById("headerUserBadge").textContent = adminFlag ? `${acc.name}（管理者）` : `${acc.name} さん`;
+
+        document.getElementById("btnOpenNameModal").classList.toggle("hidden", adminFlag);
+        document.getElementById("btnOpenAdminModal").classList.toggle("hidden", !adminFlag);
+        document.getElementById("userAccountActionButtons").classList.toggle("hidden", adminFlag);
+
+        // ヘッダー教科切替バー
+        headerSubBar.innerHTML = SUBJECTS.map(sub => {
+          const isActive = appState.screenMode === "workspace" && appState.activeSubject === sub;
+          return `<button type="button" data-header-sub="${escapeHtml(sub)}" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+            isActive ? "bg-amber-500 text-slate-950 font-extrabold" : "bg-slate-800 hover:bg-slate-700 text-slate-200"
+          }">${escapeHtml(sub)}</button>`;
+        }).join("");
+
+        headerSubBar.querySelectorAll("[data-header-sub]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            appState.activeSubject = btn.getAttribute("data-header-sub");
+            appState.screenMode = "workspace";
+            renderAllScreens();
+          });
+        });
+
+        // ホーム教科グリッド
+        const gridEl = document.getElementById("homeSubjectGrid");
+        const userData = appState.userData || createDefaultUserData();
+        gridEl.innerHTML = SUBJECTS.map(sub => {
+          const totalQ = getCombinedQuestionsForSubject(sub).length;
+          const lv = userData.difficultyBySubject[sub] || 2;
+          const subHistory = (userData.history || []).filter(h => h.subject === sub);
+          const latestScore = subHistory.length > 0 ? `${subHistory[0].score}点` : "未受験";
+
+          return `
+            <button type="button" data-home-sub="${escapeHtml(sub)}" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-[#162b49] text-left transition space-y-2 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-sm sm:text-base font-black text-slate-900">${escapeHtml(sub)}</span>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-[#162b49] text-white">Lv.${lv}</span>
+              </div>
+              <div class="text-xs text-slate-600 font-semibold">収録問題: ${totalQ}問</div>
+              <div class="text-[11px] text-slate-500 font-bold">直近スコア: ${latestScore}</div>
+            </button>
+          `;
+        }).join("");
+
+        gridEl.querySelectorAll("[data-home-sub]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            appState.activeSubject = btn.getAttribute("data-home-sub");
+            appState.screenMode = "workspace";
+            renderAllScreens();
+          });
+        });
+
+        renderTestScopeAndPacks();
+
+        if (appState.screenMode === "workspace") {
+          studyHomeScreen.classList.add("hidden");
+          subjectWorkspace.classList.remove("hidden");
+          renderSubjectWorkspace();
+        } else {
+          subjectWorkspace.classList.add("hidden");
+          studyHomeScreen.classList.remove("hidden");
+        }
+      }
+
+      function renderSubjectWorkspace() {
+        const subject = appState.activeSubject;
+        const userData = appState.userData || createDefaultUserData();
+        const pool = getCombinedQuestionsForSubject(subject);
+        const lv = userData.difficultyBySubject[subject] || 2;
+
+        document.getElementById("activeSubjectTitle").textContent = subject;
+        document.getElementById("currentDiffLabel").textContent = `Lv.${lv}`;
+        document.getElementById("subjectPoolCountBadge").textContent = `利用可能: ${pool.length}問`;
+
+        const units = Array.from(new Set(pool.map(q => q.unit || "単元一般")));
+        if (!Array.isArray(userData.unitPrefs[subject])) {
+          userData.unitPrefs[subject] = units.slice();
+          saveUserData(false);
+        }
+        const enabledUnits = userData.unitPrefs[subject];
+
+        const chipsEl = document.getElementById("unitFilterChips");
+        chipsEl.innerHTML = units.map(u => {
+          const active = enabledUnits.includes(u);
+          return `
+            <button type="button" data-unit-name="${escapeHtml(u)}" class="unit-chip-btn px-3 py-1 rounded-full text-xs font-bold border transition ${
+              active ? "bg-[#162b49] text-white border-[#162b49]" : "bg-white text-slate-500 border-slate-300"
+            }">
+              ${escapeHtml(u)}
+            </button>
+          `;
+        }).join("");
+
+        chipsEl.querySelectorAll(".unit-chip-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const uName = btn.getAttribute("data-unit-name");
+            const cur = new Set(userData.unitPrefs[subject] || []);
+            if (cur.has(uName)) {
+              cur.delete(uName);
+            } else {
+              cur.add(uName);
+            }
+            userData.unitPrefs[subject] = Array.from(cur);
+            saveUserData(false);
+            renderSubjectWorkspace();
+          });
+        });
+
+        document.getElementById("quizPlayCard").classList.add("hidden");
+        document.getElementById("quizResultCard").classList.add("hidden");
+        document.getElementById("quizSetupCard").classList.remove("hidden");
+      }
+
+      function renderAllScreens() {
+        renderHeaderAndHome();
+      }
+
+      // =========================================================================
+      // 13. イベントバインディング
+      // =========================================================================
+      function bindEvents() {
+        document.getElementById("btnDismissToast").addEventListener("click", hideToast);
+        document.getElementById("btnBrandHome").addEventListener("click", () => {
+          if (getCurrentAccount()) {
+            appState.screenMode = "home";
+            renderAllScreens();
+          }
+        });
+
+        // 認証タブ・フォーム
+        document.getElementById("tabAuthLogin").addEventListener("click", () => switchAuthTab("login"));
+        document.getElementById("tabAuthSignup").addEventListener("click", () => switchAuthTab("signup"));
+        document.getElementById("loginForm").addEventListener("submit", handleLoginSubmit);
+        document.getElementById("signupForm").addEventListener("submit", handleSignupSubmit);
+        document.getElementById("btnLogout").addEventListener("click", handleLogout);
+
+        // 削除アカウント復旧依頼（ログイン画面）
+        document.getElementById("btnToggleRecoveryBox").addEventListener("click", () => {
+          const panel = document.getElementById("recoveryRequestPanel");
+          const icon = document.getElementById("recoveryToggleIcon");
+          const hiddenNow = panel.classList.toggle("hidden");
+          icon.textContent = hiddenNow ? "＋" : "－";
+        });
+        document.getElementById("btnSubmitRecoveryRequest").addEventListener("click", handleSubmitRecoveryRequest);
+
+        // ホーム・ワークスペース遷移
+        document.getElementById("btnBackToHome").addEventListener("click", () => {
+          appState.screenMode = "home";
+          renderAllScreens();
+        });
+
+        // 出題コース・方向・単元全選択/解除
+        const btnChoice = document.getElementById("btnCourseChoice");
+        const btnDesc = document.getElementById("btnCourseDescriptive");
+        btnChoice.addEventListener("click", () => {
+          btnChoice.className = "py-2 px-3 rounded-xl text-xs font-extrabold border bg-[#162b49] text-white border-[#162b49]";
+          btnDesc.className = "py-2 px-3 rounded-xl text-xs font-extrabold border bg-white text-slate-700 border-slate-300";
+        });
+        btnDesc.addEventListener("click", () => {
+          btnDesc.className = "py-2 px-3 rounded-xl text-xs font-extrabold border bg-[#162b49] text-white border-[#162b49]";
+          btnChoice.className = "py-2 px-3 rounded-xl text-xs font-extrabold border bg-white text-slate-700 border-slate-300";
+        });
+
+        document.querySelectorAll(".word-dir-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".word-dir-btn").forEach(b => {
+              b.className = "word-dir-btn py-2 px-2 rounded-xl text-[11px] font-bold border bg-white text-slate-700 border-slate-300";
+            });
+            btn.className = "word-dir-btn py-2 px-2 rounded-xl text-[11px] font-bold border bg-[#162b49] text-white border-[#162b49]";
+          });
+        });
+
+        document.getElementById("btnAllUnitsOn").addEventListener("click", () => {
+          const subject = appState.activeSubject;
+          const units = Array.from(new Set(getCombinedQuestionsForSubject(subject).map(q => q.unit || "単元一般")));
+          appState.userData.unitPrefs[subject] = units;
+          saveUserData(false);
+          renderSubjectWorkspace();
+        });
+        document.getElementById("btnAllUnitsOff").addEventListener("click", () => {
+          const subject = appState.activeSubject;
+          appState.userData.unitPrefs[subject] = [];
+          saveUserData(false);
+          renderSubjectWorkspace();
+        });
+
+        // 演習開始・解答・次へ・結果画面ボタン
+        document.getElementById("btnStartQuiz").addEventListener("click", () => startQuizSession(false));
+        document.getElementById("btnStartSimilarQuiz").addEventListener("click", () => startQuizSession(true));
+        document.getElementById("btnSubmitDescriptive").addEventListener("click", () => {
+          evaluateAnswer(document.getElementById("descriptiveAnswerInput").value);
+        });
+        document.getElementById("btnShowHint").addEventListener("click", handleShowHint);
+        document.getElementById("btnNextQuestion").addEventListener("click", handleNextQuestion);
+        document.getElementById("btnQuitQuiz").addEventListener("click", () => {
+          appState.quizSession = null;
+          document.getElementById("quizPlayCard").classList.add("hidden");
+          document.getElementById("quizSetupCard").classList.remove("hidden");
+        });
+
+        document.getElementById("btnRetrySameSet").addEventListener("click", () => {
+          startQuizSession(Boolean(appState.lastQuizConfig?.similarOnly));
+        });
+        document.getElementById("btnResultSimilarQuiz").addEventListener("click", () => {
+          startQuizSession(true);
+        });
+        document.getElementById("btnBackToSetupFromResult").addEventListener("click", () => {
+          document.getElementById("quizResultCard").classList.add("hidden");
+          document.getElementById("quizSetupCard").classList.remove("hidden");
+        });
+
+        // 個人問題追加・一括生成・自動量産・OCR
+        document.getElementById("quickSingleForm").addEventListener("submit", handleQuickSingleAdd);
+        document.getElementById("btnBulkGenerate").addEventListener("click", handleBulkGenerate);
+        document.getElementById("btnAutoGenerateBatch").addEventListener("click", handleAutoGenerateBatch);
+
+        document.getElementById("ocrImageInput").addEventListener("change", async e => {
+          const lang = document.getElementById("ocrLangSelect").value;
+          await runTesseractOcr(
+            e.target.files,
+            lang,
+            document.getElementById("ocrProgressText"),
+            document.getElementById("ocrExtractedText")
+          );
+        });
+        document.getElementById("btnGenerateFromOcr").addEventListener("click", () => {
+          const lines = document.getElementById("ocrExtractedText").value
+            .split(/\r?\n/)
+            .map(l => l.trim())
+            .filter(Boolean);
+          if (lines.length === 0) {
+            showToast("OCRテキストが空です。", "error");
+            return;
+          }
+          const lv = appState.userData.difficultyBySubject[appState.activeSubject] || 2;
+          const created = lines.map(line => parseLineToQuestion(line, appState.activeSubject, "画像OCR問題", lv)).filter(Boolean);
+          addCustomQuestionsToCurrentUser(appState.activeSubject, created);
+          showToast(`OCRテキストから ${created.length}問 を追加しました。`, "success");
+        });
+
+        // 名前変更モーダル
+        document.getElementById("btnOpenNameModal").addEventListener("click", openNameChangeModal);
+        document.getElementById("btnOpenNameQuotaModal").addEventListener("click", openNameChangeModal);
+        document.getElementById("btnCloseNameModal").addEventListener("click", () => {
+          document.getElementById("nameChangeModal").classList.add("hidden");
+        });
+        document.getElementById("nameChangeForm").addEventListener("submit", handleNameChangeSubmit);
+        document.getElementById("nameQuotaReasonInput").addEventListener("input", e => {
+          document.getElementById("btnSubmitNameQuotaRequest").disabled = e.target.value.trim().length === 0;
+        });
+        document.getElementById("btnSubmitNameQuotaRequest").addEventListener("click", handleSubmitNameQuotaRequest);
+
+        // パスワード変更依頼モーダル
+        document.getElementById("btnOpenPwRequestModal").addEventListener("click", openPwRequestModal);
+        document.getElementById("btnClosePwRequestModal").addEventListener("click", () => {
+          document.getElementById("pwRequestModal").classList.add("hidden");
+        });
+        document.getElementById("pwRequestForm").addEventListener("submit", handlePwRequestSubmit);
+
+        // 意見・要望モーダル
+        document.getElementById("btnOpenFeedback").addEventListener("click", openFeedbackModal);
+        document.getElementById("btnCloseFeedbackModal").addEventListener("click", () => {
+          document.getElementById("feedbackModal").classList.add("hidden");
+        });
+        document.getElementById("feedbackForm").addEventListener("submit", handleFeedbackSubmit);
+
+        // 自己削除モーダル
+        document.getElementById("btnOpenSelfDeleteModal").addEventListener("click", openSelfDeleteModal);
+        document.getElementById("btnCloseSelfDeleteModal").addEventListener("click", () => {
+          document.getElementById("selfDeleteModal").classList.add("hidden");
+        });
+        document.getElementById("selfDeleteForm").addEventListener("submit", handleSelfDeleteSubmit);
+
+        // 管理者コンソールモーダル
+        document.getElementById("btnOpenAdminModal").addEventListener("click", () => openAdminModal("accounts"));
+        document.getElementById("btnCloseAdminModal").addEventListener("click", () => {
+          document.getElementById("adminModal").classList.add("hidden");
+          renderAllScreens();
+        });
+        document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            switchAdminTab(btn.getAttribute("data-admin-tab"));
+          });
+        });
+
+        // 管理者：テスト範囲お知らせ＆共有パック投稿
+        document.getElementById("adminScopeNoticeForm").addEventListener("submit", e => {
+          e.preventDefault();
+          const subject = document.getElementById("scopeSubjectSelect").value;
+          const title = document.getElementById("scopeTitleInput").value.trim();
+          const body = document.getElementById("scopeBodyInput").value.trim();
+          if (!title || !body) return;
+
+          const scopes = loadJson(STORAGE_KEYS.testScopes, []);
+          scopes.unshift({
+            id: "scope_" + Date.now(),
+            subject,
+            title,
+            body,
+            createdAt: Date.now()
+          });
+          saveJson(STORAGE_KEYS.testScopes, scopes);
+          document.getElementById("adminScopeNoticeForm").reset();
+          addActivityLog(INITIAL_ADMIN_NAME, "テスト範囲お知らせ掲載", `[${subject}] ${title}`);
+          scheduleAutoSync();
+          showToast("テスト範囲のお知らせを掲載しました。", "success");
+          renderAdminConsole();
+          renderTestScopeAndPacks();
+        });
+
+        document.getElementById("adminSharedPackForm").addEventListener("submit", e => {
+          e.preventDefault();
+          const subject = document.getElementById("sharedPackSubjectSelect").value;
+          const title = document.getElementById("sharedPackTitleInput").value.trim();
+          const lines = document.getElementById("sharedPackLinesInput").value
+            .split(/\r?\n/)
+            .map(l => l.trim())
+            .filter(Boolean);
+          if (!title || lines.length === 0) return;
+
+          const questions = lines.map(line => parseLineToQuestion(line, subject, title, 2)).filter(Boolean);
+          const packs = loadJson(STORAGE_KEYS.sharedPacks, []);
+          packs.unshift({
+            id: "pack_" + Date.now(),
+            subject,
+            title,
+            questions,
+            createdAt: Date.now()
+          });
+          saveJson(STORAGE_KEYS.sharedPacks, packs);
+          document.getElementById("adminSharedPackForm").reset();
+          addActivityLog(INITIAL_ADMIN_NAME, "共有問題パック配信", `[${subject}] ${title} (${questions.length}問)`);
+          scheduleAutoSync();
+          showToast(`共有問題パック「${title}」を配信しました。`, "success");
+          renderAdminConsole();
+          renderTestScopeAndPacks();
+        });
+
+        // 管理者：公式問題OCR
+        document.getElementById("adminOcrFileInput").addEventListener("change", async e => {
+          await runTesseractOcr(
+            e.target.files,
+            "jpn+eng",
+            document.getElementById("adminOcrStatus"),
+            document.getElementById("adminOcrText")
+          );
+        });
+        document.getElementById("btnAdminPublishOcr").addEventListener("click", () => {
+          const sub = document.getElementById("adminOcrSubjectSelect").value;
+          const lines = document.getElementById("adminOcrText").value
+            .split(/\r?\n/)
+            .map(l => l.trim())
+            .filter(Boolean);
+          if (lines.length === 0) {
+            showToast("OCRテキストを入力してください。", "error");
+            return;
+          }
+          const official = ensureOfficialQuestionsSeed();
+          if (!Array.isArray(official[sub])) official[sub] = [];
+          const created = lines.map(l => {
+            const q = parseLineToQuestion(l, sub, "公式OCR追加", 2);
+            q.source = "official";
+            return q;
+          }).filter(Boolean);
+          official[sub].push(...created);
+          saveJson(STORAGE_KEYS.officialQuestions, official);
+          document.getElementById("adminOcrText").value = "";
+          addActivityLog(INITIAL_ADMIN_NAME, "公式問題OCR追加", `${sub} に ${created.length}問 追加`);
+          scheduleAutoSync();
+          showToast(`${sub} の公式問題に ${created.length}問 追加しました。`, "success");
+          renderAllScreens();
+        });
+
+        // 別デバイス同期・学習データCSV・JSONスナップショット
+        document.getElementById("btnSaveSyncConfig").addEventListener("click", () => {
+          const roomKey = document.getElementById("syncRoomKeyInput").value.trim();
+          const endpoint = document.getElementById("syncEndpointInput").value.trim();
+          const autoSync = document.getElementById("syncAutoToggle").checked;
+          saveJson(STORAGE_KEYS.syncConfig, { roomKey, endpoint, autoSync });
+          document.getElementById("syncStatusText").textContent = "同期設定を保存しました。";
+          renderHeaderAndHome();
+          showToast("別デバイス同期設定を保存しました。", "success");
+        });
+        document.getElementById("btnCloudPushNow").addEventListener("click", () => pushSnapshotToCloud(false));
+        document.getElementById("btnCloudPullNow").addEventListener("click", () => pullSnapshotFromCloud(false));
+        document.getElementById("btnExportLearningCsv").addEventListener("click", exportLearningCsv);
+
+        document.getElementById("btnExportSnapshot").addEventListener("click", () => {
+          const jsonStr = JSON.stringify(buildFullSnapshot(), null, 2);
+          document.getElementById("snapshotJsonArea").value = jsonStr;
+          try {
+            const blob = new Blob([jsonStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `testprep_v52_snapshot_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch (_) {}
+          showToast("スナップショットJSONを書き出しました。", "success");
+        });
+
+        document.getElementById("inputImportSnapshot").addEventListener("change", async e => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          try {
+            const text = await file.text();
+            document.getElementById("snapshotJsonArea").value = text;
+            applySnapshotObject(JSON.parse(text), true);
+            showToast("JSONスナップショットを読み込み・反映しました。", "success");
+          } catch (err) {
+            console.error("Snapshot file import error:", err);
+            showToast("JSONファイルの読み込みに失敗しました。", "error");
+          }
+        });
+
+        document.getElementById("btnApplySnapshotText").addEventListener("click", () => {
+          const raw = document.getElementById("snapshotJsonArea").value.trim();
+          if (!raw) {
+            showToast("反映するJSONテキストを入力してください。", "error");
+            return;
+          }
+          try {
+            applySnapshotObject(JSON.parse(raw), true);
+            showToast("JSONスナップショットを反映しました。", "success");
+          } catch (err) {
+            console.error("Snapshot text apply error:", err);
+            showToast("JSON形式が正しくありません。", "error");
+          }
+        });
+      }
+
+      // =========================================================================
+      // 14. アプリ初期化
+      // =========================================================================
+      async function initApp() {
+        try {
+          ensureInitialAccounts();
+          ensureOfficialQuestionsSeed();
+          purgeExpiredDeletedAccounts();
+          bindEvents();
+
+          await pullSnapshotFromCloud(true);
+
+          const session = loadJson(STORAGE_KEYS.session, null);
+          if (session && session.accountId) {
+            const accounts = ensureInitialAccounts();
+            const found = accounts.find(a => a.id === session.accountId);
+            if (found && !checkAccountPunishmentStatus(found).blocked) {
+              appState.currentAccountId = found.id;
+              appState.userData = loadUserData(found.id);
+            } else {
+              localStorage.removeItem(STORAGE_KEYS.session);
+            }
+          }
+
+          renderAllScreens();
+        } catch (err) {
+          console.error("App initialization error:", err);
+          showToast("初期化中に問題が発生しましたが、操作を続行できます。", "error");
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initApp);
+      } else {
+        initApp();
+      }
+    })();
+  </script>
+</body>
+</html>
