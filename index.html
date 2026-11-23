@@ -1339,7 +1339,7 @@
         document.getElementById("selfDeleteModal").classList.remove("hidden");
       }
 
-      function handleSelfDeleteSubmit(e) {
+      async function handleSelfDeleteSubmit(e) {
         e.preventDefault();
         const errEl = document.getElementById("selfDeleteErrorMsg");
         errEl.textContent = "";
@@ -1355,7 +1355,8 @@
         const [removedAccount] = accounts.splice(idx, 1);
         saveJson(STORAGE_KEYS.accounts, accounts);
 
-        const deletedList = loadJson(STORAGE_KEYS.deletedAccounts, []);
+        const deletedList = loadJson(STORAGE_KEYS.deletedAccounts, [])
+          .filter(d => d.account?.id !== removedAccount.id);
         deletedList.unshift({
           id: "del_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
           deletedAt: Date.now(),
@@ -1371,9 +1372,9 @@
         localStorage.removeItem(STORAGE_KEYS.session);
         document.getElementById("selfDeleteModal").classList.add("hidden");
         addActivityLog(removedAccount.name, "アカウント自己削除", "パスワード照合一致により削除（24時間以内は管理者復旧可能）");
-        scheduleAutoSync();
-        showToast("アカウントを削除しました。削除から1日以内であればログイン画面から復旧を依頼できます。", "info");
         renderAllScreens();
+        await pushSnapshotToCloud(true);
+        showToast("アカウントを削除しました。削除から1日以内であればログイン画面から復旧を依頼できます。", "info");
       }
 
       async function handleSubmitRecoveryRequest() {
@@ -2252,19 +2253,28 @@
         });
 
         accListEl.querySelectorAll(".admin-delete-acc-btn").forEach(btn => {
-          btn.addEventListener("click", () => {
+          btn.addEventListener("click", async () => {
             const id = btn.getAttribute("data-acc-id");
             const list = ensureInitialAccounts();
             const idx = list.findIndex(x => x.id === id);
             if (idx === -1) return;
             const [removed] = list.splice(idx, 1);
             saveJson(STORAGE_KEYS.accounts, list);
-            const delList = loadJson(STORAGE_KEYS.deletedAccounts, []);
-            delList.unshift({ id: "del_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6), deletedAt: Date.now(), deletedBy: "admin", account: removed, userData: loadUserData(removed.id) });
+
+            const delList = loadJson(STORAGE_KEYS.deletedAccounts, [])
+              .filter(d => d.account?.id !== removed.id);
+            delList.unshift({
+              id: "del_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+              deletedAt: Date.now(),
+              deletedBy: "admin",
+              account: removed,
+              userData: loadUserData(removed.id)
+            });
             saveJson(STORAGE_KEYS.deletedAccounts, delList);
+
             addActivityLog(INITIAL_ADMIN_NAME, "管理者による削除", `${removed.name} を削除（24時間以内復旧可）`);
-            scheduleAutoSync();
             renderAdminConsole();
+            await pushSnapshotToCloud(true);
           });
         });
 
@@ -2295,7 +2305,7 @@
           }).join("");
 
           delListEl.querySelectorAll(".admin-recover-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", async () => {
               const delId = btn.getAttribute("data-del-id");
               const currentDel = loadJson(STORAGE_KEYS.deletedAccounts, []);
               const idx = currentDel.findIndex(d => d.id === delId);
@@ -2325,9 +2335,9 @@
               });
               saveJson(STORAGE_KEYS.recoveryRequests, rList);
               addActivityLog(INITIAL_ADMIN_NAME, "アカウント復旧", `${targetEntry.account.name} を復旧しました`);
-              scheduleAutoSync();
               showToast(`「${targetEntry.account.name}」を復旧しました。`, "success");
               renderAdminConsole();
+              await pushSnapshotToCloud(true);
             });
           });
         }
@@ -2650,13 +2660,6 @@
         appState.isSyncing = true;
         try {
           if (!silent && statusEl) statusEl.textContent = "クラウドへ送信中...";
-          const getRes = await fetch(url, { method: "GET" });
-          if (getRes.ok) {
-            const remoteData = await getRes.json();
-            if (remoteData && typeof remoteData === "object" && Array.isArray(remoteData.accounts)) {
-              applySnapshotObject(remoteData, true);
-            }
-          }
           const snap = buildFullSnapshot();
           const res = await fetch(url, {
             method: "PUT",
